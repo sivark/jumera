@@ -8,7 +8,6 @@
 # ------------------------------------------------------------
 
 
-
 function improveU(h_layer, l::Layer, rho_layer)
     u = l.u.elem
     u_dg = l.udag.elem
@@ -16,7 +15,6 @@ function improveU(h_layer, l::Layer, rho_layer)
     w_dg = l.wdag.elem
     h = h_layer
     rho = rho_layer
-
 
     env1 = ncon((rho,
                  w, w, w,
@@ -72,12 +70,19 @@ function improveU(h_layer, l::Layer, rho_layer)
 
     envTot = env1 + env2 + env3 + env4
 
-    U,S,V = tensorsvd(envTot, [1,2] , [3,4])
-    improved_u = ncon((conj(U),conj(V)),([-1,-2,1],[1,-3,-4]))
+    # u is a map from [3,4] to [1,2].
+    # The environment must be a map from [1,2] (Bdag) to [3,4] (A) so that we can trace the product
+    # Minus sign not too important because we're skipping for both U and Udagger, so it becomes a matter of convention?
+    Bdag,S,A = tensorsvd(envTot, [1,2] , [3,4])
+    improved_u = permutedims( conj(ncon(Bdag,A),([-1,-2,1],[1,-3,-4]))) ,([-1,-2,1],[1,-3,-4])), (3,4,1,2) )
+
+    # # Note that V is daggered already, wrt usual SVD convention
+    # U,S,V = tensorsvd(envTot, [1,2] , [3,4])
+    # improved_u = ncon((conj(U),conj(V)),([-1,-2,1],[1,-3,-4]))
+    # # HAS THIS FORGOTTEN TO TRANSPOSE THE IMPROVED DISENTANGLER?
 
     return improved_u
 end
-
 
 function improveW(h_layer, l::Layer, rho_layer)
     u = l.u.elem
@@ -176,43 +181,32 @@ function improveLayer(h_layer, l::Layer, rho_layer, params)
         u = improveU(h_layer, l, rho_layer)
         w = improveW(h_layer, l, rho_layer)
         l = Layer(Disentangler(u),Isometry(w))
-        return l
     end
+    return l
 end
 
 function improveTop(h_layer, m::MERA)
-#     U,S,V = tensorsvd(h_layer,[1,2,3],[4,5,6])
-#     # since h is hermitean, U = V-dag
-#     println(size(U))
-#     println(typeof(U))
-#     return U
-
     # Imposing periodic BCs
-    h = h_layer
-
+    h_pdBC = ncon((h_layer), ([-100,-200,-300,-400,-500,-600]))
+				+ ncon((h_layer), ([-300,-100,-200,-600,-400,-500]))
+				+ ncon((h_layer), ([-200,-300,-100,-500,-600,-400]))
     # pulling out the lowest energy eigenvector?
-    newTop = tensoreig(h_layer, [1,2,3], [4,5,6], hermitian=true)[2][:,:,:,1]
-    return newTop
+    E,U = tensoreig(h_pdBC, [1,2,3], [4,5,6], hermitian=true)
+    newTop = U[:,:,:,1]
+    energy = E[1]
+    return newTop, energy
 end
 
 function buildrhoslist(m::MERA)
     # evalscale starts at zero below layer1
     uw_list=m.levelTensors;
     totLayers = length(uw_list)
-
     stateAtEvalScale = ncon((conj(m.topTensor),m.topTensor),([-100,-200,-300],[-400,-500,-600])) |> complex
-
     rholistReverse = [];
-
     for j in reverse(1:totLayers)
-        #println(j)
         stateAtEvalScale = descend_threesite_symm(stateAtEvalScale,uw_list[j])
         push!(rholistReverse,stateAtEvalScale)
-
     end
-
-    #println(size(rholistReverse))
-
     rholist = reverse(rholistReverse)
     return rholist
 end
@@ -220,34 +214,30 @@ end
 function improveMERA!(m::MERA, h, params)
     h_orig = complex(h)
 
-    energy = complex(0.0)
+    energy = 0.0
     energyChangeFraction = 1.0
-
     counter = 0
-
     while( energyChangeFraction > params[:energyDelta] && counter < params[:maxIter])
         h_layer = h_orig
 
         # pre-build rhos at every layer
         # since we cannot iterative descend less
         # and this does not need updated layer
-        rholist = buildrhoslist(m);
+        rhoslist = buildrhoslist(m);
 
         newlayerList = [];
 
         counter += 1
         oldEnergy = energy
 
-        for (l,rho_layer) in zip(m.levelTensors,rholist)
+        for (l,rho_layer) in zip(m.levelTensors,rhoslist)
             l = improveLayer(h_layer, l, rho_layer, params)
-
             push!(newlayerList,l)
-            # ascend h by one layer
             h_layer = ascend_threesite_symm(h_layer,l)
         end
 
         # handle the top
-        newTop = improveTop(h_layer,m)
+        newTop, energy = improveTop(h_layer,m)
 
         # ACTUALLY MODIFY the network
         # m = MERA(newlayerList,newTop)
@@ -256,12 +246,17 @@ function improveMERA!(m::MERA, h, params)
 
         # compute the energy now, at any evalscale of your choice
         # in practice ascending might be cheaper than descending?
-
-        energy = expectation(h_orig,m,0)  |>  (x)->reshape(x,1)[1]
-
+        # or the other way around?
+        #RHOLIST HAS ALREADY BEEN COMPUTED!
+        #h_layer has already been computed!
+        #energy = expectation(h_orig,m,rhoslist[1+0])  |>  (x)->reshape(x,1)[1]
         energyChangeFraction = abs( (energy - oldEnergy) / energy )
-
-        println(counter," -- ",energy," -- ",energyChangeFraction)
+        if (counter%10 == 0)
+            println(counter," -- ",energy," -- ",energyChangeFraction)
+        end
     end
-    #return m
+    println("\nFinal energy of this optimized MERA: ", energy,"\n")
+
+    return h_layer
+    # Most useful return so that we can immediately start optimizing a new layer
 end

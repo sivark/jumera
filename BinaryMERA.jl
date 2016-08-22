@@ -287,6 +287,7 @@ function ascendTo(op,m::MERA,EvalScale::Int)
     return opAtEvalScale
 end
 
+#@auto-fold here
 function descendTo(m::MERA,EvalScale::Int)
     # evalscale starts at zero below layer1
     uw_list=m.levelTensors;
@@ -298,8 +299,16 @@ function descendTo(m::MERA,EvalScale::Int)
     return stateAtEvalScale
 end
 
-function expectation(op,m::MERA,EvalScale::Int)
+# OLD DEFINITION
+# function expectation(op,m::MERA,EvalScale::Int)
+#     #result::Complex{Float64}
+#     result = ncon((ascendTo(op,m,EvalScale),descendTo(m,EvalScale)),([1,2,3,4,5,6],[4,5,6,1,2,3]))
+#     return result
+# end
+# NEW DEFINITION MORE OPTIMAL IF RHOSLIST IS PRECOMPUTED
+# ASC/DESC performed outside the method of calculating expectation
+function expectation(op,m::MERA,rho)
     #result::Complex{Float64}
-    result = ncon((ascendTo(op,m,EvalScale),descendTo(m,EvalScale)),([1,2,3,4,5,6],[4,5,6,1,2,3]))
+    result = ncon((op,rho),([1,2,3,4,5,6],[4,5,6,1,2,3]))
     return result
 end

@@ -8,7 +8,7 @@
 # ------------------------------------------------------------
 
 
-function improveU(h_layer, l::Layer, rho_layer)
+function improveU(h_layer::Array{Complex{Float64},6}, l::Layer, rho_layer::Array{Complex{Float64},6}, params::Dict)
     u = l.u.elem
     u_dg = l.udag.elem
     w = l.w.elem
@@ -16,75 +16,78 @@ function improveU(h_layer, l::Layer, rho_layer)
     h = h_layer
     rho = rho_layer
 
-    env1 = ncon((rho,
-                 w, w, w,
-                 u,
-                 h,
-                 u_dg, u_dg,
-                 w_dg, w_dg, w_dg),
-                ([17,18,10,15,14,9],
-                 [15,5,6], [14,16,-1], [9,-2,8],
-                 [6,16,1,2],
-                 [1,2,-3,3,4,13],
-                 [3,4,7,12], [13,-4,11,19],
-                 [5,7,17], [12,11,18], [19,8,10]))
+    for i in 1:params[:Qsingle]
+        env1 = ncon((rho,
+                     w, w, w,
+                     u,
+                     h,
+                     u_dg, u_dg,
+                     w_dg, w_dg, w_dg),
+                    ([17,18,10,15,14,9],
+                     [15,5,6], [14,16,-1], [9,-2,8],
+                     [6,16,1,2],
+                     [1,2,-3,3,4,13],
+                     [3,4,7,12], [13,-4,11,19],
+                     [5,7,17], [12,11,18], [19,8,10]))
 
-    env2 = ncon((rho,
-                 w, w, w,
-                 u,
-                 h,
-                 u_dg, u_dg,
-                 w_dg, w_dg, w_dg),
-                ([4,15,6,3,10,5],
-                 [3,1,11], [10,9,-1], [5,-2,2],
-                 [11,9,12,19],
-                 [19,-3,-4,18,7,8],
-                 [12,18,13,14], [7,8,16,17],
-                 [1,13,4], [14,16,15], [17,2,6]))
+        env2 = ncon((rho,
+                     w, w, w,
+                     u,
+                     h,
+                     u_dg, u_dg,
+                     w_dg, w_dg, w_dg),
+                    ([4,15,6,3,10,5],
+                     [3,1,11], [10,9,-1], [5,-2,2],
+                     [11,9,12,19],
+                     [19,-3,-4,18,7,8],
+                     [12,18,13,14], [7,8,16,17],
+                     [1,13,4], [14,16,15], [17,2,6]))
 
-    env3 = ncon((rho,
-                 w, w, w,
-                 u,
-                 h,
-                 u_dg, u_dg,
-                 w_dg, w_dg, w_dg),
-                ([6,15,4,5,10,3],
-                 [5,2,-1], [10,-2,9], [3,11,1],
-                 [9,11,19,12],
-                 [-3,-4,19,8,7,18],
-                 [8,7,17,16], [18,12,14,13],
-                 [2,17,6], [16,14,15], [13,1,4]))
+        env3 = ncon((rho,
+                     w, w, w,
+                     u,
+                     h,
+                     u_dg, u_dg,
+                     w_dg, w_dg, w_dg),
+                    ([6,15,4,5,10,3],
+                     [5,2,-1], [10,-2,9], [3,11,1],
+                     [9,11,19,12],
+                     [-3,-4,19,8,7,18],
+                     [8,7,17,16], [18,12,14,13],
+                     [2,17,6], [16,14,15], [13,1,4]))
 
-    env4 = ncon((rho,
-                 w, w, w,
-                 u,
-                 h,
-                 u_dg, u_dg,
-                 w_dg, w_dg, w_dg),
-                ([10,18,17,9,14,15],
-                 [9,8,-1], [14,-2,16], [15,6,5],
-                 [16,6,2,1],
-                 [-4,2,1,13,4,3],
-                 [-3,13,19,11], [4,3,12,7],
-                 [8,19,10], [11,12,18], [7,5,17]))
+        env4 = ncon((rho,
+                     w, w, w,
+                     u,
+                     h,
+                     u_dg, u_dg,
+                     w_dg, w_dg, w_dg),
+                    ([10,18,17,9,14,15],
+                     [9,8,-1], [14,-2,16], [15,6,5],
+                     [16,6,2,1],
+                     [-4,2,1,13,4,3],
+                     [-3,13,19,11], [4,3,12,7],
+                     [8,19,10], [11,12,18], [7,5,17]))
 
-    envTot = env1 + env2 + env3 + env4
+        envTot = env1 + env2 + env3 + env4
 
-    # u is a map from [3,4] to [1,2].
-    # The environment must be a map from [1,2] (Bdag) to [3,4] (A) so that we can trace the product
-    # Minus sign not too important because we're skipping for both U and Udagger, so it becomes a matter of convention?
-    Bdag,S,A = tensorsvd(envTot, [1,2] , [3,4])
-    improved_u = permutedims( conj(ncon(Bdag,A),([-1,-2,1],[1,-3,-4]))) ,([-1,-2,1],[1,-3,-4])), (3,4,1,2) )
+        # u is a map from [3,4] to [1,2].
+        # The environment must be a map from [1,2] (Bdag) to [3,4] (A) so that we can trace the product
+        # But the convention for the environment here is transposed! Therefore we need not transpose answer for U!
+        # Minus sign not too important because we're skipping for both U and Udagger, so it becomes a matter of convention?
+        #Bdag,S,A = tensorsvd(envTot, [1,2] , [3,4])
+        #improved_u = permutedims( conj(ncon(Bdag,A),([-1,-2,1],[1,-3,-4]))) ,([-1,-2,1],[1,-3,-4])), (3,4,1,2) )
 
-    # # Note that V is daggered already, wrt usual SVD convention
-    # U,S,V = tensorsvd(envTot, [1,2] , [3,4])
-    # improved_u = ncon((conj(U),conj(V)),([-1,-2,1],[1,-3,-4]))
-    # # HAS THIS FORGOTTEN TO TRANSPOSE THE IMPROVED DISENTANGLER?
-
-    return improved_u
+        # Note that V is daggered already, wrt usual SVD convention
+        U,S,V = tensorsvd(envTot, [1,2] , [3,4])
+        improved_u = (-1)*ncon((conj(U),conj(V)),([-1,-2,1],[1,-3,-4]))
+        u = improved_u
+        u_dg = permutedims(conj(u), (3,4,1,2))
+    end
+    return u
 end
 
-function improveW(h_layer, l::Layer, rho_layer)
+function improveW(h_layer::Array{Complex{Float64},6}, l::Layer, rho_layer::Array{Complex{Float64},6}, params::Dict)
     u = l.u.elem
     u_dg = l.udag.elem
     w = l.w.elem
@@ -92,171 +95,218 @@ function improveW(h_layer, l::Layer, rho_layer)
     h = h_layer
     rho = rho_layer
 
-    env1 = ncon((rho,
-                 w, w,
-                 u, u,
-                 h,
-                 u_dg, u_dg,
-                 w_dg, w_dg, w_dg),
-                ([16,15,19,18,17,-1],
-                 [18,5,6], [17,9,8],
-                 [6,9,2,1], [8,-2,10,11],
-                 [2,1,10,4,3,12],
-                 [4,3,7,14], [12,11,13,20],
-                 [5,7,16], [14,13,15], [20,-3,19]))
+    for i in 1:params[:Qsingle]
+        env1 = ncon((rho,
+                     w, w,
+                     u, u,
+                     h,
+                     u_dg, u_dg,
+                     w_dg, w_dg, w_dg),
+                    ([16,15,19,18,17,-1],
+                     [18,5,6], [17,9,8],
+                     [6,9,2,1], [8,-2,10,11],
+                     [2,1,10,4,3,12],
+                     [4,3,7,14], [12,11,13,20],
+                     [5,7,16], [14,13,15], [20,-3,19]))
 
-    env2 = ncon((rho,
-                 w, w,
-                 u, u,
-                 h,
-                 u_dg, u_dg,
-                 w_dg, w_dg, w_dg),
-                ([18,17,19,16,15,-1],
-                 [16,12,13], [15,5,6],
-                 [13,5,9,7], [6,-2,2,1],
-                 [7,2,1,8,4,3],
-                 [9,8,14,11], [4,3,10,20],
-                 [12,14,18], [11,10,17], [20,-3,19]))
+        env2 = ncon((rho,
+                     w, w,
+                     u, u,
+                     h,
+                     u_dg, u_dg,
+                     w_dg, w_dg, w_dg),
+                    ([18,17,19,16,15,-1],
+                     [16,12,13], [15,5,6],
+                     [13,5,9,7], [6,-2,2,1],
+                     [7,2,1,8,4,3],
+                     [9,8,14,11], [4,3,10,20],
+                     [12,14,18], [11,10,17], [20,-3,19]))
 
-    env3 = ncon((rho,
-                 w, w,
-                 u, u,
-                 h,
-                 u_dg, u_dg,
-                 w_dg, w_dg, w_dg),
-                ([19,20,15,18,-1,14],
-                 [18,5,6], [14,17,13],
-                 [6,-2,2,1], [-3,17,12,11],
-                 [2,1,12,4,3,9],
-                 [4,3,7,10], [9,11,8,16],
-                 [5,7,19], [10,8,20], [16,13,15]))
+        env3 = ncon((rho,
+                     w, w,
+                     u, u,
+                     h,
+                     u_dg, u_dg,
+                     w_dg, w_dg, w_dg),
+                    ([19,20,15,18,-1,14],
+                     [18,5,6], [14,17,13],
+                     [6,-2,2,1], [-3,17,12,11],
+                     [2,1,12,4,3,9],
+                     [4,3,7,10], [9,11,8,16],
+                     [5,7,19], [10,8,20], [16,13,15]))
 
-    env4 = ncon((rho,
-                 w, w,
-                 u, u,
-                 h,
-                 u_dg, u_dg,
-                 w_dg, w_dg, w_dg),
-                ([15,20,19,14,-1,18],
-                 [14,13,17], [18,6,5],
-                 [17,-2,11,12], [-3,6,1,2],
-                 [12,1,2,9,3,4],
-                 [11,9,16,8], [3,4,10,7],
-                 [13,16,15], [8,10,20], [7,5,19]))
+        env4 = ncon((rho,
+                     w, w,
+                     u, u,
+                     h,
+                     u_dg, u_dg,
+                     w_dg, w_dg, w_dg),
+                    ([15,20,19,14,-1,18],
+                     [14,13,17], [18,6,5],
+                     [17,-2,11,12], [-3,6,1,2],
+                     [12,1,2,9,3,4],
+                     [11,9,16,8], [3,4,10,7],
+                     [13,16,15], [8,10,20], [7,5,19]))
 
-    env5 = ncon((rho,
-                 w, w,
-                 u, u,
-                 h,
-                 u_dg, u_dg,
-                 w_dg, w_dg, w_dg),
-                ([19,17,18,-1,15,16],
-                 [15,6,5], [16,13,12],
-                 [-3,6,1,2], [5,13,7,9],
-                 [1,2,7,3,4,8],
-                 [3,4,20,10], [8,9,11,14],
-                 [-2,20,19], [10,11,17], [14,12,18]))
+        env5 = ncon((rho,
+                     w, w,
+                     u, u,
+                     h,
+                     u_dg, u_dg,
+                     w_dg, w_dg, w_dg),
+                    ([19,17,18,-1,15,16],
+                     [15,6,5], [16,13,12],
+                     [-3,6,1,2], [5,13,7,9],
+                     [1,2,7,3,4,8],
+                     [3,4,20,10], [8,9,11,14],
+                     [-2,20,19], [10,11,17], [14,12,18]))
 
-    env6 = ncon((rho,
-                 w, w,
-                 u, u,
-                 h,
-                 u_dg, u_dg,
-                 w_dg, w_dg, w_dg),
-                ([19,15,16,-1,17,18],
-                 [17,8,9], [18,6,5],
-                 [-3,8,11,10], [9,6,1,2],
-                 [10,1,2,12,3,4],
-                 [11,12,20,13], [3,4,14,7],
-                 [-2,20,19], [13,14,15], [7,5,16]))
+        env6 = ncon((rho,
+                     w, w,
+                     u, u,
+                     h,
+                     u_dg, u_dg,
+                     w_dg, w_dg, w_dg),
+                    ([19,15,16,-1,17,18],
+                     [17,8,9], [18,6,5],
+                     [-3,8,11,10], [9,6,1,2],
+                     [10,1,2,12,3,4],
+                     [11,12,20,13], [3,4,14,7],
+                     [-2,20,19], [13,14,15], [7,5,16]))
 
-    envTot = env1 + env2 + env3 + env4 + env5 + env6
-    U,S,V = tensorsvd(envTot, [1], [2,3])
-    improved_w = ncon((conj(U), conj(V)), ([-1,1], [1,-2,-3]))
-    return improved_w
+        envTot = env1 + env2 + env3 + env4 + env5 + env6
+        U,S,V = tensorsvd(envTot, [1], [2,3])
+        improved_w = (-1)*ncon((conj(U), conj(V)), ([-1,1], [1,-2,-3]))
+        w = improved_w
+        w_dg = permutedims(conj(w), (2,3,1))
+    end
+    return w
 end
 
-function improveLayer(h_layer, l::Layer, rho_layer, params)
-    for i in 1:params[:layerIters]
-        u = improveU(h_layer, l, rho_layer)
-        w = improveW(h_layer, l, rho_layer)
+function improveLayer(h_layer::Array{Complex{Float64},6}, l::Layer, rho_layer::Array{Complex{Float64},6}, params::Dict)
+    for i in 1:params[:Qlayer]
+        #println(size(h_layer),"improvelayer",i)
+        u = improveU(h_layer, l, rho_layer, params)
+        w = improveW(h_layer, l, rho_layer, params)
         l = Layer(Disentangler(u),Isometry(w))
     end
     return l
 end
 
-function improveTop(h_layer, m::MERA)
+function improveTop(h_layer::Array{Complex{Float64},6}, m::MERA)
     # Imposing periodic BCs
-    h_pdBC = ncon((h_layer), ([-100,-200,-300,-400,-500,-600]))
+    h_pdBC = (ncon((h_layer), ([-100,-200,-300,-400,-500,-600]))
 				+ ncon((h_layer), ([-300,-100,-200,-600,-400,-500]))
-				+ ncon((h_layer), ([-200,-300,-100,-500,-600,-400]))
+				+ ncon((h_layer), ([-200,-300,-100,-500,-600,-400])) )/3
     # pulling out the lowest energy eigenvector?
     E,U = tensoreig(h_pdBC, [1,2,3], [4,5,6], hermitian=true)
     newTop = U[:,:,:,1]
-    energy = E[1]
-    return newTop, energy
+    threeSiteEnergy = E[1]
+    return newTop, threeSiteEnergy
+    #println(energy,"improveTop")
 end
 
-function buildrhoslist(m::MERA)
+function buildReverseRhosList(m::MERA, top_n=length(m.levelTensors))
+    # Specify the number of EvalScales sought. If not provided, defaults to all EvalScales
     # evalscale starts at zero below layer1
     uw_list=m.levelTensors;
     totLayers = length(uw_list)
     stateAtEvalScale = ncon((conj(m.topTensor),m.topTensor),([-100,-200,-300],[-400,-500,-600])) |> complex
-    rholistReverse = [];
-    for j in reverse(1:totLayers)
+    rhosListReverse = [];
+    push!(rhosListReverse,stateAtEvalScale)
+    for j in reverse((totLayers-top_n+1):totLayers)
         stateAtEvalScale = descend_threesite_symm(stateAtEvalScale,uw_list[j])
-        push!(rholistReverse,stateAtEvalScale)
+        push!(rhosListReverse,stateAtEvalScale)
     end
-    rholist = reverse(rholistReverse)
-    return rholist
+    return rhosListReverse
 end
 
-function improveMERA!(m::MERA, h, params)
-    h_orig = complex(h)
+# function improveMERA!(m::MERA, h_base::Array{Complex{Float64},6}, Dmax::Float64, params::Dict)
+#     #h_layer = h
+#
+#     energy = 0.0
+#     energy_persite = energy + (Dmax/3)
+#     energyChangeFraction = 1.0
+#     counter = 0
+#     while( energyChangeFraction > params[:energyDelta] && counter < params[:Qsweep])
+#         #h_layer = h
+#
+#         # pre-build rhos at every layer
+#         # since we cannot iterative descend, and this does not need an updated layer
+#         rhoslist = reverse(buildReverseRhosList(m));
+#
+#         counter += 1
+#         oldEnergy_persite = energy_persite
+#
+#         improveGraft!(h_base, m, )
+#
+#         # Note that h_layer inside the loop is not the same as what's in global scope?? :-|
+#         # for j in collect(1:length(m.levelTensors))
+#         #     l = improveLayer(h_layer, m.levelTensors[j], rhoslist[j+1], params)
+#         #     #push!(newlayerList,l)
+#         #     m.levelTensors[j] = l;
+#         #     h_layer = ascend_threesite_symm(h_layer,l)
+#         # end
+#         #
+#         # # handle the top
+#         # m.topTensor, energy = improveTop(h_layer,m)
+#         # energy_persite = (energy + Dmax)/3
+#
+#         # ACTUALLY MODIFY the network
+#         # m = MERA(newlayerList,newTop)
+#         #m.levelTensors = newlayerList;
+#         #m.topTensor = newTop;
+#
+#         # compute the energy now, at any evalscale of your choice
+#         # in practice ascending might be cheaper than descending?
+#         # or the other way around?
+#         #RHOLIST HAS ALREADY BEEN COMPUTED!
+#         #h_layer has already been computed!
+#         #energy = expectation(h_orig,m,rhoslist[1+0])  |>  (x)->reshape(x,1)[1]
+#
+#         energyChangeFraction = abs( (energy_persite - oldEnergy_persite) / energy_persite )
+#         if (counter%10 == 0)
+#             println(counter," -- ",energy_persite," -- ",energyChangeFraction)
+#         end
+#     end
+#
+#     println("\nFinal energy of this optimized MERA: ", energy_persite)
+#     exact_persite = -4/pi;
+#     println("Off from the exact answer by: ", (energy_persite - exact_persite)/(exact_persite) )
+# end
 
-    energy = 0.0
-    energyChangeFraction = 1.0
-    counter = 0
-    while( energyChangeFraction > params[:energyDelta] && counter < params[:maxIter])
-        h_layer = h_orig
 
-        # pre-build rhos at every layer
-        # since we cannot iterative descend less
-        # and this does not need updated layer
-        rhoslist = buildrhoslist(m);
+# Write a function to train the n coarsest layers, and also the top tensor
+# By default, the number of layers is the whole MERA
+function improveGraft!(h_base::Array{Complex{Float64},6}, m::MERA, params::Dict, top_n=length(m.levelTensors))
+    #uw_list = m.levelTensors
+    H = reshape(h_base, (8*8*8,8*8*8))
+    D, V = eig(Hermitian(H))
+    D_max = D[end]
+    energyPerSite = 0.0
 
-        newlayerList = [];
+    len = length(m.levelTensors)
+    h_layer = ascendTo(h_base, m, (length(m.levelTensors)-top_n) )
+    #println(size(h_layer))
 
-        counter += 1
-        oldEnergy = energy
+    # we need the state only at levels coarser than the ones we're training
+    rhoslist = buildReverseRhosList(m, top_n-1)
 
-        for (l,rho_layer) in zip(m.levelTensors,rhoslist)
-            l = improveLayer(h_layer, l, rho_layer, params)
-            push!(newlayerList,l)
-            h_layer = ascend_threesite_symm(h_layer,l)
+    # Convert this to a while with a check on :EnergyDelta also [TODO]
+    for i in 1:params[:Qsweep]
+        h_layer = ascendTo(h_base, m, (length(m.levelTensors)-top_n) )
+        for j in collect(len-top_n+1:len)
+            m.levelTensors[j] = improveLayer(h_layer, m.levelTensors[j], rhoslist[len-j+1], params)
+            h_layer = ascend_threesite_symm(h_layer,m.levelTensors[j])
+            #println(size(h_layer),"improvegraft")
         end
+        m.topTensor, threeSiteEnergy =  improveTop(h_layer, m)
+        #println(threeSiteEnergy,"improveGraft!")
+        energyPerSite = (threeSiteEnergy + Dmax)/3
 
-        # handle the top
-        newTop, energy = improveTop(h_layer,m)
-
-        # ACTUALLY MODIFY the network
-        # m = MERA(newlayerList,newTop)
-        m.levelTensors = newlayerList;
-        m.topTensor = newTop;
-
-        # compute the energy now, at any evalscale of your choice
-        # in practice ascending might be cheaper than descending?
-        # or the other way around?
-        #RHOLIST HAS ALREADY BEEN COMPUTED!
-        #h_layer has already been computed!
-        #energy = expectation(h_orig,m,rhoslist[1+0])  |>  (x)->reshape(x,1)[1]
-        energyChangeFraction = abs( (energy - oldEnergy) / energy )
-        if (counter%10 == 0)
-            println(counter," -- ",energy," -- ",energyChangeFraction)
+        if(i%10 == 0)
+            println(i, "--", energyPerSite)
         end
     end
-    println("\nFinal energy of this optimized MERA: ", energy,"\n")
-
-    return h_layer
-    # Most useful return so that we can immediately start optimizing a new layer
+    return energyPerSite
 end

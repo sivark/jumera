@@ -41,15 +41,15 @@ isingH, Dmax = build_H_Ising();
 # TRAINING HYPER-PARAMETERS
 #----------------------------------------------------------------------------
 
-parameters_init = Dict(:energyDelta => 1e-10 , :Qsweep => 500 , :Qlayer => 3, :Qsingle => 2);
-parameters_graft = Dict(:energyDelta => 1e-10, :Qsweep => 500, :Qlayer => 3, :Qsingle => 2);
+parameters_init = Dict(:energyDelta => 1e-10 , :Qsweep => 2000 , :Qlayer => 3, :Qsingle => 2);
+parameters_graft = Dict(:energyDelta => 1e-10, :Qsweep => 2000, :Qlayer => 3, :Qsingle => 2);
 # The previous layers went through 1000 iterations -- what right do we have to make the new ones go through less!?
 # Only after these many will the error range of the new one also come down to 10^-6
-parameters_fullsweep = Dict(:energyDelta => 1e-10 , :Qsweep => 500 , :Qlayer => 3, :Qsingle => 2);
+parameters_fullsweep = Dict(:energyDelta => 1e-10 , :Qsweep => 3000 , :Qlayer => 3, :Qsingle => 2);
 
 # 8 layers, each of BD 5
-const LAYER_SHAPE=(8,5,5,5,5,5,5,5,5)
-const INIT_LAYERS=3
+const LAYER_SHAPE=(8,5,5,5,5,5,5,5,5,5)
+const INIT_LAYERS=7
 const INIT_LAYER_SHAPE=LAYER_SHAPE[1:(INIT_LAYERS+1)]
 
 # Print out the hyperparameters
@@ -64,18 +64,19 @@ println()
 # PRE-TRAINING
 #----------------------------------------------------------------------------
 
-m = generate_random_MERA(INIT_LAYER_SHAPE);
-println("Starting the optimization...")
+## Load already optimized 6-layer MERA
+m = load("solutionMERA_7layers_(8,5,5,5,5,5,5,5)shape.jld","m_7layers")
+
+# m = generate_random_MERA(INIT_LAYER_SHAPE);
+# println("Starting the optimization...")
 
 # Below command works IFF we start with a single layer
 #push!(h_layer, improveMERA!(m,isingH, Dmax, parameters_init) )
 #improveMERA!(m, isingH, Dmax, parameters_init)
-improveGraft!(isingH, m, parameters_init)
+improveGraft!(isingH, m, parameters_init, 2)
 save("solutionMERA_$(INIT_LAYERS)layers_$(INIT_LAYER_SHAPE)shape.jld", "m_$(INIT_LAYERS)layers", m)
 println(string(map((x) -> '-', collect(1:28))...))
 
-## Load already optimized 5-layer MERA
-#m = load("solutionMERA_chi8_5layers.jld","m_5layers")
 
 #----------------------------------------------------------------------------
 # GRAFTING AND GROWING A DEEPER MERA
@@ -94,7 +95,7 @@ for lyr in (INIT_LAYERS+1):(length(LAYER_SHAPE)-1)
     energy_persite = improveGraft!(isingH, m, parameters_fullsweep)
 
     println("\nFinal energy of this optimized MERA: ", energy_persite)
-    exact_persite = -4/pi + (0.12928)/(2^(lyr*2)); # including the leading finite-size correction
+    exact_persite = -4/pi + (pi/12)/(81*4^(lyr-1)); # including the leading finite-size correction
     println("Off from the exact answer by: ", (energy_persite - exact_persite)/(exact_persite) )
 
     save("solutionMERA_$(lyr)layers_$(LAYER_SHAPE[1:lyr+1])shape.jld", "m_$(lyr)layers", m)

@@ -49,9 +49,6 @@ immutable Layer
     # Constructor enforces the invariance IFF type is immutable
     # else it trusts the user to not do bad things like directly access udag and change it to be incompatible with u
     # Keeping structure mutable leaves the option of using it while optimizing a MERA, etc
-
-    # Also, can we enforce the "right" network connection where
-    # the V inputs come from one U outputs and all U outputs go to V inputs?
 end
 
 #MUTABLE, in case we want to optimize in-place?
@@ -64,9 +61,9 @@ type MERA
     topTensor::Array{Complex{Float},3} # 3 indices
 end
 
-# Does it make sense to specify the bond-dimension as an input to each of these types,
-# so that one can sanity-check the disentangler and isometry?
-# Not quite straightforward, since we might want a MERA where the bond dimension changes with layer :-?
+# [TODO] Implement invariants for the MERA
+#   1. Unitarity properties of U and V
+#   2. Connections U -> V within a MERA layer
 
 # ------------------------------------------------------------
 # UTILITY FUNCTIONS

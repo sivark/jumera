@@ -95,8 +95,8 @@ for lyr in (INIT_LAYERS+1):(length(LAYER_SHAPE)-1)
     energy_persite = improveGraft!(isingH, m, parameters_fullsweep)
 
     println("\nFinal energy of this optimized MERA: ", energy_persite)
-    exact_persite = -4/pi + (pi/12)/(81*4^(lyr-1)); # including the leading finite-size correction
-    println("Off from the exact answer by: ", (energy_persite - exact_persite)/(exact_persite) )
+    exact_persite = -4/pi - (pi/6)/(81*4^(lyr-1)); # including the leading finite-size correction
+    println("Off from the 1/Nsq corrected answer by: ", (energy_persite - exact_persite)/(exact_persite) )
 
     save("solutionMERA_$(lyr)layers_$(LAYER_SHAPE[1:lyr+1])shape.jld", "m_$(lyr)layers", m)
     println(string(map((x) -> '-', collect(1:28))...))

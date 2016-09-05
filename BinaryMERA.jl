@@ -2,24 +2,22 @@ using TensorFactorizations
 using TensorOperations
 using NCon
 
-
-# Ideally, CHI must be a property of the interface between layers, not of the MERA!
-
 # ------------------------------------------------------------
 # DATA STRUCTURE
 # ------------------------------------------------------------
 
 type Tensor
-    # maybe a parent type from which to derive isometries and disentanglers
-    # ensure that this is a tensor with upper and loewr indices, and specify contraction rules, index convention, etc.
+    # ensure that this is a tensor with upper and lower indices,
+    # specified shape/dimensions
+    # specify contraction rules, index convention, etc.
 end
 
 immutable Isometry
-    elem::Array{Complex{Float64},3}
+    elem::Array{Complex{Float},3}
 end
 
 immutable Disentangler
-    elem::Array{Complex{Float64},4}
+    elem::Array{Complex{Float},4}
 end
 
 # can we separate bonds pointing to the UV and the IR, to minimize chances of contraction mistakes?
@@ -30,17 +28,14 @@ end
 
 immutable Layer
     # first disentangle and then coarsegrain
-    # so the bound-dimension given out by U must match the bond dimension taken in by W
+    # so the bond-dimension given out by U must match the bond dimension taken in by W
     u::Disentangler
     w::Isometry
     udag::Disentangler
     wdag::Isometry
 
-    # BTW, we could just inline those types as it currently stands, unless we'll do some other checks
-
-    # should we also compute and store udag and vdag for easy access?
-    # It seems more efficient to do this once for each layer
-    # rather than for each usage of the superoperator
+    # It seems more efficient to store udag and vdag once for each layer
+    # rather than compute for each usage of the superoperator
 
     function build_udg(u::Disentangler)
         udg = Disentangler(permutedims(conj(u.elem), (3,4,1,2)))
@@ -69,7 +64,7 @@ end
 
 type MERA
     levelTensors::Array{Layer} # sequence of layers
-    topTensor::Array{Complex{Float64},3} # 3 indices
+    topTensor::Array{Complex{Float},3} # 3 indices
 end
 
 # Does it make sense to specify the bond-dimension as an input to each of these types,
@@ -81,7 +76,7 @@ end
 # ------------------------------------------------------------
 
 function random_complex_tensor(chi, rank)
-    res::Array{Complex{Float64},rank}
+    res::Array{Complex{Float},rank}
     real = randn(ntuple(_ -> chi, rank)...)
     imag = randn(ntuple(_ -> chi, rank)...)
     res = real + im*imag
@@ -175,9 +170,9 @@ end
 # Note that the rightside operator is the parity flip rotation of the leftside operator :-)
 # ------------------------------------------------------------
 
-function ascend_threesite_left(op::Array{Complex{Float64},3*2}, l::Layer)
+function ascend_threesite_left(op::Array{Complex{Float},3*2}, l::Layer)
 #     # MINE
-#     scaled_op::Array{Complex{Float64},3*2}
+#     scaled_op::Array{Complex{Float},3*2}
 #     scaled_op = ncon((l.w.elem, l.w.elem, l.w.elem,
 #     l.u.elem, l.u.elem,
 #     op,
@@ -190,7 +185,7 @@ function ascend_threesite_left(op::Array{Complex{Float64},3*2}, l::Layer)
 #     [5,7,-400], [15,14,-500], [17,6,-600]))
 
     # Guifre's
-    scaled_op::Array{Complex{Float64},3*2}
+    scaled_op::Array{Complex{Float},3*2}
     scaled_op = ncon((l.w.elem, l.w.elem, l.w.elem,
     l.u.elem, l.u.elem,
     op,
@@ -205,9 +200,9 @@ function ascend_threesite_left(op::Array{Complex{Float64},3*2}, l::Layer)
     return scaled_op
 end
 
-function ascend_threesite_right(op::Array{Complex{Float64},3*2}, l::Layer)
+function ascend_threesite_right(op::Array{Complex{Float},3*2}, l::Layer)
 #     # MINE
-#     scaled_op::Array{Complex{Float64},3*2}
+#     scaled_op::Array{Complex{Float},3*2}
 #     scaled_op = ncon((l.w.elem, l.w.elem, l.w.elem,
 #     l.u.elem, l.u.elem,
 #     op,
@@ -220,7 +215,7 @@ function ascend_threesite_right(op::Array{Complex{Float64},3*2}, l::Layer)
 #     [6,17,-400], [14,15,-500], [7,5,-600]))
 
     # Guifre's
-    scaled_op::Array{Complex{Float64},3*2}
+    scaled_op::Array{Complex{Float},3*2}
     scaled_op = ncon((l.w.elem, l.w.elem, l.w.elem,
     l.u.elem, l.u.elem,
     op,
@@ -235,13 +230,13 @@ function ascend_threesite_right(op::Array{Complex{Float64},3*2}, l::Layer)
     return scaled_op
 end
 
-function ascend_threesite_symm(op::Array{Complex{Float64},3*2}, l::Layer)
+function ascend_threesite_symm(op::Array{Complex{Float},3*2}, l::Layer)
     return 0.5*( ascend_threesite_left(op,l)+ascend_threesite_right(op,l) )
 end
 
 
-function descend_threesite_right(op::Array{Complex{Float64},3*2}, l::Layer)
-    scaled_op::Array{Complex{Float64},3*2}
+function descend_threesite_right(op::Array{Complex{Float},3*2}, l::Layer)
+    scaled_op::Array{Complex{Float},3*2}
 #     scaled_op = ncon((l.wdag.elem, l.wdag.elem, l.wdag.elem,
 #     l.udag.elem, l.udag.elem,
 #     op,
@@ -269,8 +264,8 @@ function descend_threesite_right(op::Array{Complex{Float64},3*2}, l::Layer)
 
 end
 
-function descend_threesite_left(op::Array{Complex{Float64},3*2}, l::Layer)
-    scaled_op::Array{Complex{Float64},3*2}
+function descend_threesite_left(op::Array{Complex{Float},3*2}, l::Layer)
+    scaled_op::Array{Complex{Float},3*2}
 
 #     # Mine
 #     scaled_op = ncon((l.wdag.elem, l.wdag.elem, l.wdag.elem,
@@ -299,13 +294,13 @@ function descend_threesite_left(op::Array{Complex{Float64},3*2}, l::Layer)
     return scaled_op
 end
 
-function descend_threesite_symm(op::Array{Complex{Float64},3*2}, l::Layer)
+function descend_threesite_symm(op::Array{Complex{Float},3*2}, l::Layer)
     return 0.5*( descend_threesite_left(op,l)+descend_threesite_right(op,l) )
 end
 
 # Write recursive application as a stateless macro?
 
-function ascendTo(op::Array{Complex{Float64},3*2},m::MERA,EvalScale::Int64)
+function ascendTo(op::Array{Complex{Float},3*2},m::MERA,EvalScale::Int64)
     #uw_list=m.levelTensors;
     #totLayers = length(uw_list)
     opAtEvalScale = op
@@ -316,7 +311,6 @@ function ascendTo(op::Array{Complex{Float64},3*2},m::MERA,EvalScale::Int64)
     return opAtEvalScale
 end
 
-#@auto-fold here
 function descendTo(m::MERA,EvalScale::Int)
     # evalscale starts at zero below layer1
     uw_list=m.levelTensors;
@@ -330,7 +324,7 @@ end
 
 # OLD DEFINITION
 # function expectation(op,m::MERA,EvalScale::Int)
-#     #result::Complex{Float64}
+#     #result::Complex{Float}
 #     result = ncon((ascendTo(op,m,EvalScale),descendTo(m,EvalScale)),([1,2,3,4,5,6],[4,5,6,1,2,3]))
 #     return result
 # end
@@ -338,7 +332,7 @@ end
 # ASC/DESC performed outside the method of calculating expectation
 function expectation(op,rho)
     # Need operator and rho to be given at the same scale
-    #result::Complex{Float64}
+    #result::Complex{Float}
     result = ncon((op,rho),([1,2,3,4,5,6],[4,5,6,1,2,3]))
     return result
 end

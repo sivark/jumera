@@ -25,7 +25,6 @@ end
 # And complex conjugation changes what's primed and unprimed -- then things will go through fine.
 # basically upper-vs-lower indices
 
-
 immutable Layer
     # first disentangle and then coarsegrain
     # so the bond-dimension given out by U must match the bond dimension taken in by W
@@ -171,20 +170,6 @@ end
 # ------------------------------------------------------------
 
 function ascend_threesite_left(op::Array{Complex{Float},3*2}, l::Layer)
-#     # MINE
-#     scaled_op::Array{Complex{Float},3*2}
-#     scaled_op = ncon((l.w.elem, l.w.elem, l.w.elem,
-#     l.u.elem, l.u.elem,
-#     op,
-#     l.udag.elem, l.udag.elem,
-#     l.wdag.elem, l.wdag.elem, l.wdag.elem),
-#     ([-100,5,8], [-200,10,11], [-300,16,6],
-#     [8,10,2,1], [11,16,12,9],
-#     [2,1,12,4,3,13],
-#     [4,3,7,15], [13,9,14,17],
-#     [5,7,-400], [15,14,-500], [17,6,-600]))
-
-    # Guifre's
     scaled_op::Array{Complex{Float},3*2}
     scaled_op = ncon((l.w.elem, l.w.elem, l.w.elem,
     l.u.elem, l.u.elem,
@@ -196,25 +181,10 @@ function ascend_threesite_left(op::Array{Complex{Float},3*2}, l::Layer)
     [1,2,10,3,4,14],
     [3,4,7,13], [14,12,11,17],
     [5,7,-400], [13,11,-500], [17,15,-600]))
-
     return scaled_op
 end
 
 function ascend_threesite_right(op::Array{Complex{Float},3*2}, l::Layer)
-#     # MINE
-#     scaled_op::Array{Complex{Float},3*2}
-#     scaled_op = ncon((l.w.elem, l.w.elem, l.w.elem,
-#     l.u.elem, l.u.elem,
-#     op,
-#     l.udag.elem, l.udag.elem,
-#     l.wdag.elem, l.wdag.elem, l.wdag.elem),
-#     ([-100,6,16], [-200,11,10], [-300,8,5],
-#     [16,11,9,12], [10,8,1,2],
-#     [12,1,2,13,3,4],
-#     [9,13,17,14], [3,4,15,7],
-#     [6,17,-400], [14,15,-500], [7,5,-600]))
-
-    # Guifre's
     scaled_op::Array{Complex{Float},3*2}
     scaled_op = ncon((l.w.elem, l.w.elem, l.w.elem,
     l.u.elem, l.u.elem,
@@ -222,11 +192,10 @@ function ascend_threesite_right(op::Array{Complex{Float},3*2}, l::Layer)
     l.udag.elem, l.udag.elem,
     l.wdag.elem, l.wdag.elem, l.wdag.elem),
     ([-100,15,16], [-200,8,9], [-300,6,5],
-    [16,8,12,10], [9,6,1,2],
-    [10,1,2,14,3,4],
-    [12,14,17,11], [3,4,13,7],
+    [16,8,12,10], [9,6,2,1],
+    [10,2,1,14,4,3],
+    [12,14,17,11], [4,3,13,7],
     [15,17,-400], [11,13,-500], [7,5,-600]))
-
     return scaled_op
 end
 

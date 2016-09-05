@@ -249,9 +249,7 @@ function improveGraft!(h_base::Array{Complex{Float64},6}, m::MERA, params::Dict,
         #println(threeSiteEnergy,"improveGraft!")
         energyPerSite = (threeSiteEnergy + Dmax)/3
 
-        if(i%10 == 0)
-            println(i, "--", energyPerSite)
-        end
+        println(i, ":", energyPerSite)
     end
     return energyPerSite
 end

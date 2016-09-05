@@ -264,17 +264,10 @@ function descendTo(m::MERA,EvalScale::Int)
     return stateAtEvalScale
 end
 
-# OLD DEFINITION
-# function expectation(op,m::MERA,EvalScale::Int)
-#     #result::Complex{Float}
-#     result = ncon((ascendTo(op,m,EvalScale),descendTo(m,EvalScale)),([1,2,3,4,5,6],[4,5,6,1,2,3]))
-#     return result
-# end
-# NEW DEFINITION MORE OPTIMAL IF RHOSLIST IS PRECOMPUTED
-# ASC/DESC performed outside the method of calculating expectation
 function expectation(op,rho)
     # Need operator and rho to be given at the same scale
-    #result::Complex{Float}
+    # Scale for operators is 1-indexed while
+    # Scale for states is 0-indexed at the ultraviolet cutoff
     result = ncon((op,rho),([1,2,3,4,5,6],[4,5,6,1,2,3]))
     return result
 end

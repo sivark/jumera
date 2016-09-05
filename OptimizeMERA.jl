@@ -221,61 +221,6 @@ function buildReverseRhosList(m::MERA, top_n=length(m.levelTensors))
     return rhosListReverse
 end
 
-# function improveMERA!(m::MERA, h_base::Array{Complex{Float64},6}, Dmax::Float64, params::Dict)
-#     #h_layer = h
-#
-#     energy = 0.0
-#     energy_persite = energy + (Dmax/3)
-#     energyChangeFraction = 1.0
-#     counter = 0
-#     while( energyChangeFraction > params[:energyDelta] && counter < params[:Qsweep])
-#         #h_layer = h
-#
-#         # pre-build rhos at every layer
-#         # since we cannot iterative descend, and this does not need an updated layer
-#         rhoslist = reverse(buildReverseRhosList(m));
-#
-#         counter += 1
-#         oldEnergy_persite = energy_persite
-#
-#         improveGraft!(h_base, m, )
-#
-#         # Note that h_layer inside the loop is not the same as what's in global scope?? :-|
-#         # for j in collect(1:length(m.levelTensors))
-#         #     l = improveLayer(h_layer, m.levelTensors[j], rhoslist[j+1], params)
-#         #     #push!(newlayerList,l)
-#         #     m.levelTensors[j] = l;
-#         #     h_layer = ascend_threesite_symm(h_layer,l)
-#         # end
-#         #
-#         # # handle the top
-#         # m.topTensor, energy = improveTop(h_layer,m)
-#         # energy_persite = (energy + Dmax)/3
-#
-#         # ACTUALLY MODIFY the network
-#         # m = MERA(newlayerList,newTop)
-#         #m.levelTensors = newlayerList;
-#         #m.topTensor = newTop;
-#
-#         # compute the energy now, at any evalscale of your choice
-#         # in practice ascending might be cheaper than descending?
-#         # or the other way around?
-#         #RHOLIST HAS ALREADY BEEN COMPUTED!
-#         #h_layer has already been computed!
-#         #energy = expectation(h_orig,m,rhoslist[1+0])  |>  (x)->reshape(x,1)[1]
-#
-#         energyChangeFraction = abs( (energy_persite - oldEnergy_persite) / energy_persite )
-#         if (counter%10 == 0)
-#             println(counter," -- ",energy_persite," -- ",energyChangeFraction)
-#         end
-#     end
-#
-#     println("\nFinal energy of this optimized MERA: ", energy_persite)
-#     exact_persite = -4/pi;
-#     println("Off from the exact answer by: ", (energy_persite - exact_persite)/(exact_persite) )
-# end
-
-
 # Write a function to train the n coarsest layers, and also the top tensor
 # By default, the number of layers is the whole MERA
 function improveGraft!(h_base::Array{Complex{Float64},6}, m::MERA, params::Dict, top_n=length(m.levelTensors))

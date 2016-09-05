@@ -240,26 +240,20 @@ function descend_threesite_symm(op::Array{Complex{Float},3*2}, l::Layer)
     return 0.5*( descend_threesite_left(op,l)+descend_threesite_right(op,l) )
 end
 
-# Write recursive application as a stateless macro?
-
 function ascendTo(op::Array{Complex{Float},3*2},m::MERA,EvalScale::Int64)
-    #uw_list=m.levelTensors;
-    #totLayers = length(uw_list)
     opAtEvalScale = op
     for i in collect(1:EvalScale)
         opAtEvalScale = ascend_threesite_symm(opAtEvalScale,m.levelTensors[i])
-        #opAtEvalScale = ascend_threesite_symm(opAtEvalScale,uw_list[i])
     end
     return opAtEvalScale
 end
 
 function descendTo(m::MERA,EvalScale::Int)
     # evalscale starts at zero below layer1
-    uw_list=m.levelTensors;
-    totLayers = length(uw_list)
+    totLayers = length(m.levelTensors)
     stateAtEvalScale = ncon((conj(m.topTensor),m.topTensor),([-100,-200,-300],[-400,-500,-600])) |> complex
     for j in reverse((EvalScale+1):totLayers)
-        stateAtEvalScale = descend_threesite_symm(stateAtEvalScale,uw_list[j])
+        stateAtEvalScale = descend_threesite_symm(stateAtEvalScale,m.levelTensors[j])
     end
     return stateAtEvalScale
 end

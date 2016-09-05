@@ -206,59 +206,32 @@ end
 
 function descend_threesite_right(op::Array{Complex{Float},3*2}, l::Layer)
     scaled_op::Array{Complex{Float},3*2}
-#     scaled_op = ncon((l.wdag.elem, l.wdag.elem, l.wdag.elem,
-#     l.udag.elem, l.udag.elem,
-#     op,
-#     l.u.elem, l.u.elem,
-#     l.w.elem, l.w.elem, l.w.elem),
-#     ([3,10,1],[11,8,7],[9,6,4],
-#     [13,-100,10,11],[-200,-300,8,9],
-#     [1,7,4,2,14,5],
-#     [12,15,13,-400], [16,17,-500,-600],
-#     [2,3,12], [14,15,16], [5,17,6]))
-#     return scaled_op
-
-    # Guifre's
     scaled_op = ncon((l.wdag.elem, l.wdag.elem, l.wdag.elem,
     l.udag.elem, l.udag.elem,
     op,
     l.u.elem, l.u.elem,
     l.w.elem, l.w.elem, l.w.elem),
-    ([4,8,5],[7,17,9],[16,1,2],
-    [12,-100,8,7],[-200,-300,17,16],
-    [5,9,2,6,13,3],
-    [11,10,12,-400], [14,15,-500,-600],
-    [6,4,11], [13,10,14], [3,15,1]))
+    ([4,9,5],[7,17,8],[16,1,2],
+    [13,-100,9,7],[-200,-300,17,16],
+    [5,8,2,6,11,3],
+    [12,10,13,-400], [15,14,-500,-600],
+    [6,4,12], [11,10,15], [3,14,1]))
     return scaled_op
 
 end
 
 function descend_threesite_left(op::Array{Complex{Float},3*2}, l::Layer)
     scaled_op::Array{Complex{Float},3*2}
-
-#     # Mine
-#     scaled_op = ncon((l.wdag.elem, l.wdag.elem, l.wdag.elem,
-#     l.udag.elem, l.udag.elem,
-#     op,
-#     l.u.elem, l.u.elem,
-#     l.w.elem, l.w.elem, l.w.elem),
-#     ([6,9,4],[8,11,7],[10,3,1],
-#     [-100,-200,9,8],[-300,13,11,10],
-#     [4,7,1,5,14,2],
-#     [17,16,-400,-500],[15,12,-600,13],
-#     [5,6,17],[14,16,15],[2,12,3]))
-
-    # Guifre's
     scaled_op = ncon((l.wdag.elem, l.wdag.elem, l.wdag.elem,
     l.udag.elem, l.udag.elem,
     op,
     l.u.elem, l.u.elem,
     l.w.elem, l.w.elem, l.w.elem),
-    ([1,16,2],[17,7,9],[8,4,5],
-    [-100,-200,16,17],[-300,12,7,8],
-    [2,9,5,3,13,6],
-    [15,14,-400,-500],[10,11,-600,12],
-    [3,1,15],[13,14,10],[6,11,4]))
+    ([1,16,2],[17,7,8],[9,4,5],
+    [-100,-200,16,17],[-300,13,7,9],
+    [2,8,5,3,11,6],
+    [14,15,-400,-500],[10,12,-600,13],
+    [3,1,14],[11,15,10],[6,12,4]))
 
     return scaled_op
 end

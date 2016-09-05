@@ -39,9 +39,6 @@ m = load("solutionMERA_7layers_(8,5,5,5,5,5,5,5)shape.jld","m_7layers")
 # m = generate_random_MERA(INIT_LAYER_SHAPE);
 # println("Starting the optimization...")
 
-# Below command works IFF we start with a single layer
-#push!(h_layer, improveMERA!(m,isingH, Dmax, parameters_init) )
-#improveMERA!(m, isingH, Dmax, parameters_init)
 improveGraft!(isingH, m, parameters_init, 2)
 save("solutionMERA_$(INIT_LAYERS)layers_$(INIT_LAYER_SHAPE)shape.jld", "m_$(INIT_LAYERS)layers", m)
 println(string(map((x) -> '-', collect(1:28))...))

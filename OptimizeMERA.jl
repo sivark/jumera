@@ -237,7 +237,7 @@ function improveGraft!(h_base::Array{Complex{Float64},6}, m::MERA, params::Dict,
     # we need the state only at levels coarser than the ones we're training
     rhoslist = buildReverseRhosList(m, top_n-1)
 
-    # Convert this to a while with a check on :EnergyDelta also [TODO]
+    # [TODO] Convert this to a while with a check on :EnergyDelta also
     for i in 1:params[:Qsweep]
         h_layer = ascendTo(h_base, m, (length(m.levelTensors)-top_n) )
         for j in collect(len-top_n+1:len)

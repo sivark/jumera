@@ -13,9 +13,9 @@ isingH, Dmax = build_H_Ising();
 # TRAINING HYPER-PARAMETERS
 #----------------------------------------------------------------------------
 
-parameters_init = Dict(:energyDelta => 1e-10 , :Qsweep => 2000 , :Qlayer => 3, :Qsingle => 2);
-parameters_graft = Dict(:energyDelta => 1e-10, :Qsweep => 2000, :Qlayer => 3, :Qsingle => 2);
-parameters_fullsweep = Dict(:energyDelta => 1e-10 , :Qsweep => 3000 , :Qlayer => 3, :Qsingle => 2);
+parameters_init = Dict(:energyDelta => 1e-10 , :Qsweep => 1000 , :Qlayer => 4, :Qsingle => 3);
+parameters_graft = Dict(:energyDelta => 1e-10, :Qsweep => 600, :Qlayer => 4, :Qsingle => 3);
+parameters_fullsweep = Dict(:energyDelta => 1e-10 , :Qsweep => 2000 , :Qlayer => 4, :Qsingle => 3);
 
 const LAYER_SHAPE=(8,5,5,5,5,5,5,5,5,5)
 const INIT_LAYERS=7
@@ -49,7 +49,9 @@ println(string(map((x) -> '-', collect(1:28))...))
 #----------------------------------------------------------------------------
 
 for lyr in (INIT_LAYERS+1):(length(LAYER_SHAPE)-1)
-    println("\nNow adding layer number: ", lyr, "\n")
+    println("\nNow adding layer number: ", lyr)
+    exact_persite = exact_energy_persite(lyr);
+    println("Exact per-site energy for this depth: ", exact_persite,"\n")
 
     newLayer = generate_random_layer(LAYER_SHAPE[lyr],LAYER_SHAPE[lyr+1])
     push!(m.levelTensors, newLayer)
@@ -62,7 +64,6 @@ for lyr in (INIT_LAYERS+1):(length(LAYER_SHAPE)-1)
     energy_persite = improveGraft!(isingH, m, parameters_fullsweep)
 
     println("\nFinal energy of this optimized MERA: ", energy_persite)
-    exact_persite = exact_energy_persite(9*(2^(lyr-1)));
     println("Off from the 1/Nsq corrected answer by: ", (energy_persite - exact_persite)/(exact_persite) )
 
     save("solutionMERA_$(lyr)layers_$(LAYER_SHAPE[1:lyr+1])shape.jld", "m_$(lyr)layers", m)

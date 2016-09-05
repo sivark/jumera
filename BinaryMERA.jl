@@ -51,12 +51,9 @@ immutable Layer
     # Keeping structure mutable leaves the option of using it while optimizing a MERA, etc
 end
 
-#MUTABLE, in case we want to optimize in-place?
-# To save on memory, we can make this be a container class?
-# Or should we make this immutable and expect Julia to run GC
-# every time we create a new MERA object and the old one aint needed?
-
 type MERA
+    # MUTABLE container class
+    # since we can optimize in-place and save memory allocation
     levelTensors::Array{Layer} # sequence of layers
     topTensor::Array{Complex{Float},3} # 3 indices
 end

@@ -26,8 +26,6 @@ end
 # basically upper-vs-lower indices
 
 immutable Layer
-    # first disentangle and then coarsegrain
-    # so the bond-dimension given out by U must match the bond dimension taken in by W
     u::Disentangler
     w::Isometry
     udag::Disentangler
@@ -83,7 +81,10 @@ function random_complex_tensor(chi, rank)
 end
 
 function generate_random_layer(chi_lower,chi_upper)
-    # Generate a random tensor and SVD it to get a random unitary.
+    # first disentangle and then coarsegrain
+    # so the bond-dimension given out by U must match the bond dimension taken in by W
+
+    # Generate a random tensor and SVD it to get a "random" unitary.
 
     temp = random_complex_tensor(chi_lower, 4)
     U, S, V = tensorsvd(temp, [1,2], [3,4])
@@ -93,51 +94,13 @@ function generate_random_layer(chi_lower,chi_upper)
     U, S, V = tensorsvd(temp, [1,2], [3,4])
     w = ncon((U, V), ([-1,-2,1], [1,-3,-4]))
     w = reshape(w, (chi_lower^2, chi_lower, chi_lower))
-    # Truncate to the first chi singular values
+    # Truncate to the first chi_upper singular values
     w = w[1:chi_upper,:,:]
 
     udag = permutedims(conj(u), (3,4,1,2))
     wdag = permutedims(conj(w), (2,3,1))
     return Layer(Disentangler(u), Isometry(w))
 end
-# function generate_random_layer(chi)
-#     # Generate a random tensor and SVD it to get a random unitary.
-#
-#     temp = random_complex_tensor(chi, 4)
-#     U, S, V = tensorsvd(temp, [1,2], [3,4])
-#     u = ncon((U, V), ([-1,-2,1], [1,-3,-4]))
-#
-#     temp = random_complex_tensor(chi, 4)
-#     U, S, V = tensorsvd(temp, [1,2], [3,4])
-#     w = ncon((U, V), ([-1,-2,1], [1,-3,-4]))
-#     w = reshape(w, (chi^2, chi, chi))
-#     # Truncate to the first chi singular values
-#     w = w[1:chi,:,:]
-#
-#     udag = permutedims(conj(u), (3,4,1,2))
-#     wdag = permutedims(conj(w), (2,3,1))
-#
-# #     # VERIFYING that
-# #     # u*udag and udag*u give 1
-# #     # w*wdag gives 1 and wdag*w does not
-#
-# #     foo1=ncon((u,udag),([-100,-200,1,2],[1,2,-300,-400]))
-# #     foo2=ncon((udag,u),([-100,-200,1,2],[1,2,-300,-400]))
-# #     foo1=reshape(foo1,(chi^2,chi^2))
-# #     foo2=reshape(foo2,(chi^2,chi^2))
-# #     println(vecnorm(foo1-eye(chi^2)))
-# #     println(vecnorm(foo2-eye(chi^2)))
-#
-# #     foo3=ncon((w,wdag),([-100,1,2],[1,2,-200]))
-# #     foo4=ncon((wdag,w),([-100,-200,1],[1,-300,-400]))
-# #     foo4=reshape(foo4,(chi^2,chi^2))
-# #     println(vecnorm(foo3-eye(chi)))
-# #     println(ncon((foo4),([1,1])))
-#
-#     return Layer(Disentangler(u), Isometry(w))
-# end
-
-
 
 function generate_random_top(chi)
     top = randn(ntuple(_ -> chi, 3)...)

@@ -154,15 +154,7 @@ function generate_random_MERA(listOfChis)
 
     return MERA(uw_list, topTensor)
 end
-# function generate_random_MERA(chi,n_layers)
-#     uw_list = []
-#     for i in 1:n_layers
-#         push!(uw_list, generate_random_layer(chi) )
-#     end
-#     topTensor = generate_random_top(chi)
-#
-#     return MERA(uw_list, topTensor)
-# end
+
 
 # ------------------------------------------------------------
 # BUILDING SUPER-OPERATORS

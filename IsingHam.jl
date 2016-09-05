@@ -25,3 +25,8 @@ function build_H_Ising(h=1.0)
     h = reshape(H, (8,8,8,8,8,8)) |> complex
     return h, D_max
 end
+
+function exact_energy_persite(nsites)
+    # including the leading finite-size correction
+    return ( -4/pi - (pi/6)/(nsites*nsites) )
+end

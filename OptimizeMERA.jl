@@ -1,10 +1,10 @@
 # ------------------------------------------------------------
+# [TODO] Autogenerate environments
 # 1. Understand why these are the optimal contraction orderings for each case
 # 2. Can I automate the creation of these different environments? Either with a function or with a macro
 # 3. For each tensor, what is the environment? Find and evaluate
-# 4.  Write a macro to go through the fully contracted network,
+# 4. Write a macro to go through the fully contracted network,
 #       and knock off an isometry and label the open legs [-100,-200,-300,-400]
-# 5. SVD the environment, find UVdag and update the tensor!
 # ------------------------------------------------------------
 
 

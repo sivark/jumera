@@ -1,41 +1,13 @@
-# Ising model with transverse magnetic field h (critical h=1 by default)
 println("Hello, World.")
 
 using JLD
 
 include("BinaryMERA.jl")
 include("OptimizeMERA.jl")
+include("IsingHam.jl")
 
 println("Going to build the Ising micro hamiltonian.")
-
-function build_H_Ising(h=1.0)
-    h::Array{Complex{Float64},6}
-    D_max::Float64
-    X = [0 1; 1 0]
-    Z = [1 0; 0 -1]
-    I = eye(2)
-    XX = kron(X,X)
-    ZI = kron(Z,I)
-    IZ = kron(I,Z)
-    H2 = -(XX + h/2*(ZI+IZ))
-    H = H2 / 3  # See below for an explanation of the 1/3.
-    for n = 3:9
-        eyen2 = eye(2^(n-2))
-        # Terms at the borders of the blocks of three that get grouped together
-        # need to be normalized differently from the ones that are within blocks.
-        factor = (n == 4 || n == 7) ? 1/2 : 1/3
-        H = kron(H, I) + kron(eyen2, H2)*factor
-    end
-    D, V = eig(Hermitian(H))
-    D_max = D[end]
-    # subtract largest eigenvalue, so that the spectrum is negative
-    H = H - eye(2^9)*D_max
-    h = reshape(H, (8,8,8,8,8,8)) |> complex
-    return h, D_max
-end
-
 isingH, Dmax = build_H_Ising();
-
 
 #----------------------------------------------------------------------------
 # TRAINING HYPER-PARAMETERS
@@ -43,11 +15,8 @@ isingH, Dmax = build_H_Ising();
 
 parameters_init = Dict(:energyDelta => 1e-10 , :Qsweep => 2000 , :Qlayer => 3, :Qsingle => 2);
 parameters_graft = Dict(:energyDelta => 1e-10, :Qsweep => 2000, :Qlayer => 3, :Qsingle => 2);
-# The previous layers went through 1000 iterations -- what right do we have to make the new ones go through less!?
-# Only after these many will the error range of the new one also come down to 10^-6
 parameters_fullsweep = Dict(:energyDelta => 1e-10 , :Qsweep => 3000 , :Qlayer => 3, :Qsingle => 2);
 
-# 8 layers, each of BD 5
 const LAYER_SHAPE=(8,5,5,5,5,5,5,5,5,5)
 const INIT_LAYERS=7
 const INIT_LAYER_SHAPE=LAYER_SHAPE[1:(INIT_LAYERS+1)]

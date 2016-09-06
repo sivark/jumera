@@ -166,7 +166,6 @@ function descend_threesite_right(op::Array{Complex{Float64},3*2}, l::Layer)
     [12,10,13,-400], [15,14,-500,-600],
     [6,4,12], [11,10,15], [3,14,1]))
     return scaled_op
-
 end
 
 function descend_threesite_left(op::Array{Complex{Float64},3*2}, l::Layer)
@@ -181,7 +180,6 @@ function descend_threesite_left(op::Array{Complex{Float64},3*2}, l::Layer)
     [2,8,5,3,11,6],
     [14,15,-400,-500],[10,12,-600,13],
     [3,1,14],[11,15,10],[6,12,4]))
-
     return scaled_op
 end
 

@@ -235,13 +235,13 @@ function improveGraft!(h_base::Array{Complex{Float64},6}, m::MERA, params::Dict,
     #println(size(h_layer))
 
     # we need the state only at levels coarser than the ones we're training
-    rhoslist = buildReverseRhosList(m, top_n-1)
+    rhoslist_rev = buildReverseRhosList(m, top_n-1)
 
     # [TODO] Convert this to a while with a check on :EnergyDelta also
     for i in 1:params[:Qsweep]
         h_layer = ascendTo(h_base, m, (length(m.levelTensors)-top_n) )
         for j in collect(len-top_n+1:len)
-            m.levelTensors[j] = improveLayer(h_layer, m.levelTensors[j], rhoslist[len-j+1], params)
+            m.levelTensors[j] = improveLayer(h_layer, m.levelTensors[j], rhoslist_rev[len-j+1], params)
             h_layer = ascend_threesite_symm(h_layer,m.levelTensors[j])
             #println(size(h_layer),"improvegraft")
         end

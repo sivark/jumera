@@ -56,10 +56,14 @@ for lyr in (INIT_LAYERS+1):(length(LAYER_SHAPE)-1)
     newLayer = generate_random_layer(LAYER_SHAPE[lyr],LAYER_SHAPE[lyr+1])
     push!(m.levelTensors, newLayer)
     # Improving the newly added layer and the top tensor
-    # also the penultimate layer
-    energy_persite = improveGraft!(isingH, m, parameters_graft, 2)
-    energy_persite = improveGraft!(isingH, m, parameters_graft, 3)
-    energy_persite = improveGraft!(isingH, m, parameters_graft, 4)
+    energy_persite = improveGraft!(isingH, m, parameters_graft, 1)
+    # It's important to iterate over the top layer several times,
+    # otherwise it will wreck the lower layers when we sweep!
+
+    energy_persite = improveGraft!(isingH, m, parameters_sweep, 2)
+    energy_persite = improveGraft!(isingH, m, parameters_sweep, 3)
+    energy_persite = improveGraft!(isingH, m, parameters_sweep, 4)
+
     # sweep over all layers
     energy_persite = improveGraft!(isingH, m, parameters_fullsweep)
 

@@ -13,13 +13,13 @@ isingH, Dmax = build_H_Ising();
 # TRAINING HYPER-PARAMETERS
 #----------------------------------------------------------------------------
 
-parameters_init = Dict(:energyDelta => 1e-10 , :Qsweep => 201 , :Qlayer => 5, :Qsingle => 4);
-parameters_graft = Dict(:energyDelta => 1e-10, :Qsweep => 1001, :Qlayer => 3, :Qsingle => 2);
-parameters_sweep = Dict(:energyDelta => 1e-10 , :Qsweep => 601 , :Qlayer => 4, :Qsingle => 3);
+parameters_init  = Dict(:energyDelta => 1e-8, :Qsweep => 601 , :Qlayer => 5, :Qsingle => 4);
+parameters_graft = Dict(:energyDelta => 1e-8, :Qsweep => 1001, :Qlayer => 3, :Qsingle => 2);
+parameters_sweep = Dict(:energyDelta => 1e-8, :Qsweep => 401 , :Qlayer => 4, :Qsingle => 3);
 
-const LAYER_SHAPE=(8,5,5,5,5,5,5,5,5,5)
-const INIT_LAYERS=7
-const INIT_LAYER_SHAPE=LAYER_SHAPE[1:(INIT_LAYERS+1)]
+const LAYER_SHAPE       = (8,5,5,5,5,5,5,5,5,5)
+const INIT_LAYERS       = 2
+const INIT_LAYER_SHAPE  = LAYER_SHAPE[1:(INIT_LAYERS+1)]
 
 # Print out the hyperparameters
 println("Shape of init layers -- ", INIT_LAYER_SHAPE)
@@ -34,12 +34,12 @@ println()
 #----------------------------------------------------------------------------
 
 ## Load already optimized 7-layer MERA
-m = load("solutionMERA_7layers_(8,5,5,5,5,5,5,5)shape.jld","m_7layers")
+#    m = load("solutionMERA_7layers_(8,5,5,5,5,5,5,5)shape.jld","m_7layers")
+#    improveGraft!(isingH, m, parameters_init,1)
 
-# m = generate_random_MERA(INIT_LAYER_SHAPE);
-# println("Starting the optimization...")
-
-improveGraft!(isingH, m, parameters_init,1)
+m = generate_random_MERA(INIT_LAYER_SHAPE);
+println("Starting the optimization...")
+improveGraft!(isingH, m, parameters_init)
 save("solutionMERA_$(INIT_LAYERS)layers_$(INIT_LAYER_SHAPE)shape.jld", "m_$(INIT_LAYERS)layers", m)
 println(string(map((x) -> '-', collect(1:28))...))
 
@@ -66,8 +66,8 @@ for lyr in (INIT_LAYERS+1):(length(LAYER_SHAPE)-1)
     # otherwise it will wreck the lower layers when we sweep!
 
     energy_persite = improveGraft!(isingH, m, parameters_sweep, 2)
-    energy_persite = improveGraft!(isingH, m, parameters_sweep, 3)
-    energy_persite = improveGraft!(isingH, m, parameters_sweep, 4)
+    #energy_persite = improveGraft!(isingH, m, parameters_sweep, 3)
+    #energy_persite = improveGraft!(isingH, m, parameters_sweep, 4)
 
     # sweep over all layers
     energy_persite = improveGraft!(isingH, m, parameters_sweep)

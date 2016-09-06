@@ -14,8 +14,8 @@ isingH, Dmax = build_H_Ising();
 #----------------------------------------------------------------------------
 
 parameters_init = Dict(:energyDelta => 1e-10 , :Qsweep => 201 , :Qlayer => 5, :Qsingle => 4);
-parameters_graft = Dict(:energyDelta => 1e-10, :Qsweep => 601, :Qlayer => 4, :Qsingle => 3);
-parameters_sweep = Dict(:energyDelta => 1e-10 , :Qsweep => 1001 , :Qlayer => 4, :Qsingle => 3);
+parameters_graft = Dict(:energyDelta => 1e-10, :Qsweep => 1001, :Qlayer => 3, :Qsingle => 2);
+parameters_sweep = Dict(:energyDelta => 1e-10 , :Qsweep => 601 , :Qlayer => 4, :Qsingle => 3);
 
 const LAYER_SHAPE=(8,5,5,5,5,5,5,5,5,5)
 const INIT_LAYERS=7

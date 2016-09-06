@@ -39,7 +39,7 @@ function exact_energy_persite(n_lyr)
 
     EnPBC_approx_9_15 = map(approximate_energy_persite_PBC,81*4.^collect(9:15));
 
-    EnPBC=[EnPBC_exact_diag...,EnPBC_approx_9_15...]
+    EnPBC=[EnPBC_exactdiag_1_8...,EnPBC_approx_9_15...]
     # Exact results only for up to 8 layers. Beyond that, 1/Nsq approximation is good enough since our MERA is not yet that accurate
 
     return EnPBC[n_lyr]

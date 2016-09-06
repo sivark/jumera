@@ -251,6 +251,9 @@ function improveGraft!(h_base::Array{Complex{Float64},6}, m::MERA, params::Dict,
         #println(threeSiteEnergy,"improveGraft!")
         energyPerSite = (threeSiteEnergy + Dmax)/3
 
+        # Generate new RhosList for next round of optimization
+        rhoslist_partial_rev = buildReverseRhosList(m, top_n-1)
+
         if(i%50 == 1)
             println(i, ":", energyPerSite)
             push!(rhoslist_snapshots,   (buildReverseRhosList(m) |> reverse)   )

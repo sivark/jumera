@@ -239,9 +239,15 @@ function improveGraft!(h_base::Array{Complex{Float64},6}, m::MERA, params::Dict,
     rhoslist_partial_rev = buildReverseRhosList(m, top_n-1)
     rhoslist_snapshots = []
 
-    # [TODO] Convert this to a while with a check on :EnergyDelta also
-    for i in 1:params[:Qsweep]
+    fractional_energy_change = 1;
+    energyPerSiteOld = 0;
+    i = 1;
+    while (i<params[:Qsweep] && fractional_energy_change>params[:EnergyDelta])
+
+        # Ascend Hamiltonian to the layer we want to optimize
         h_layer = ascendTo(h_base, m, (length(m.levelTensors)-top_n) )
+
+        # Move to the IR, progressively optimizing the layers we care about
         for j in collect(len-top_n+1:len)
             m.levelTensors[j] = improveLayer(h_layer, m.levelTensors[j], rhoslist_partial_rev[len-j+1], params)
             h_layer = ascend_threesite_symm(h_layer,m.levelTensors[j])
@@ -259,7 +265,12 @@ function improveGraft!(h_base::Array{Complex{Float64},6}, m::MERA, params::Dict,
             push!(rhoslist_snapshots,   (buildReverseRhosList(m) |> reverse)   )
             # Pushes the full rhoslist instead of just the top few layers we used
         end
+
+        i+=1;
+        fractional_energy_change = (energyPerSite - energyPerSiteOld)/energyPerSite;
+        energyPerSiteOld = energyPerSite;
     end
+
     save("rhoslist_snapshots_$(length(m.levelTensors))layers.jld", "rhoslist_snapshots_$(top_n)smoothing", rhoslist_snapshots)
     println(string(map((x) -> '-', collect(1:28))...))
     return energyPerSite

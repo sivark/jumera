@@ -7,6 +7,7 @@
 #       and knock off an isometry and label the open legs [-100,-200,-300,-400]
 # ------------------------------------------------------------
 
+using JLD
 
 function improveU(h_layer::Array{Complex{Float64},6}, l::Layer, rho_layer::Array{Complex{Float64},6}, params::Dict)
     u = l.u.elem
@@ -236,6 +237,7 @@ function improveGraft!(h_base::Array{Complex{Float64},6}, m::MERA, params::Dict,
 
     # we need the state only at levels coarser than the ones we're training
     rhoslist_rev = buildReverseRhosList(m, top_n-1)
+    rhoslist_snapshots = []
 
     # [TODO] Convert this to a while with a check on :EnergyDelta also
     for i in 1:params[:Qsweep]
@@ -249,7 +251,12 @@ function improveGraft!(h_base::Array{Complex{Float64},6}, m::MERA, params::Dict,
         #println(threeSiteEnergy,"improveGraft!")
         energyPerSite = (threeSiteEnergy + Dmax)/3
 
-        println(i, ":", energyPerSite)
+        if(i%50 == 1)
+            println(i, ":", energyPerSite)
+            push!(rhoslist_snapshots,   (rhoslist_rev |> reverse)   )
+        end
     end
+    save("rhoslist_snapshots_$(length(m.levelTensors))layers.jld", "rhoslist_snapshots_$(top_n)smoothing", rhoslist_snapshots)
+    println(string(map((x) -> '-', collect(1:28))...))
     return energyPerSite
 end

@@ -13,11 +13,11 @@ type Tensor
 end
 
 immutable Isometry
-    elem::Array{Complex{Float64},3}
+    elem::Array{Complex{Float},3}
 end
 
 immutable Disentangler
-    elem::Array{Complex{Float64},4}
+    elem::Array{Complex{Float},4}
 end
 
 # can we separate bonds pointing to the UV and the IR, to minimize chances of contraction mistakes?
@@ -55,7 +55,7 @@ type MERA
     # MUTABLE container class
     # since we can optimize in-place and save memory allocation
     levelTensors::Array{Layer} # sequence of layers
-    topTensor::Array{Complex{Float64},3} # 3 indices
+    topTensor::Array{Complex{Float},3} # 3 indices
 end
 
 # [TODO] Implement invariants for the MERA
@@ -67,7 +67,7 @@ end
 # ------------------------------------------------------------
 
 function random_complex_tensor(chi, rank)
-    res::Array{Complex{Float64},rank}
+    res::Array{Complex{Float},rank}
     real = randn(ntuple(_ -> chi, rank)...)
     imag = randn(ntuple(_ -> chi, rank)...)
     res = real + im*imag
@@ -118,8 +118,8 @@ end
 # Note that the rightside operator is the parity flip rotation of the leftside operator :-)
 # ------------------------------------------------------------
 
-function ascend_threesite_left(op::Array{Complex{Float64},3*2}, l::Layer)
-    scaled_op::Array{Complex{Float64},3*2}
+function ascend_threesite_left(op::Array{Complex{Float},3*2}, l::Layer)
+    scaled_op::Array{Complex{Float},3*2}
     scaled_op = ncon((l.w.elem, l.w.elem, l.w.elem,
     l.u.elem, l.u.elem,
     op,
@@ -133,8 +133,8 @@ function ascend_threesite_left(op::Array{Complex{Float64},3*2}, l::Layer)
     return scaled_op
 end
 
-function ascend_threesite_right(op::Array{Complex{Float64},3*2}, l::Layer)
-    scaled_op::Array{Complex{Float64},3*2}
+function ascend_threesite_right(op::Array{Complex{Float},3*2}, l::Layer)
+    scaled_op::Array{Complex{Float},3*2}
     scaled_op = ncon((l.w.elem, l.w.elem, l.w.elem,
     l.u.elem, l.u.elem,
     op,
@@ -148,13 +148,13 @@ function ascend_threesite_right(op::Array{Complex{Float64},3*2}, l::Layer)
     return scaled_op
 end
 
-function ascend_threesite_symm(op::Array{Complex{Float64},3*2}, l::Layer)
-    return 0.5*( ascend_threesite_left(op,l)+ascend_threesite_right(op,l) )
+function ascend_threesite_symm(op::Array{Complex{Float},3*2}, l::Layer)
+    return convert(Float,0.5)*( ascend_threesite_left(op,l)+ascend_threesite_right(op,l) )
 end
 
 
-function descend_threesite_right(op::Array{Complex{Float64},3*2}, l::Layer)
-    scaled_op::Array{Complex{Float64},3*2}
+function descend_threesite_right(op::Array{Complex{Float},3*2}, l::Layer)
+    scaled_op::Array{Complex{Float},3*2}
     scaled_op = ncon((l.wdag.elem, l.wdag.elem, l.wdag.elem,
     l.udag.elem, l.udag.elem,
     op,
@@ -168,8 +168,8 @@ function descend_threesite_right(op::Array{Complex{Float64},3*2}, l::Layer)
     return scaled_op
 end
 
-function descend_threesite_left(op::Array{Complex{Float64},3*2}, l::Layer)
-    scaled_op::Array{Complex{Float64},3*2}
+function descend_threesite_left(op::Array{Complex{Float},3*2}, l::Layer)
+    scaled_op::Array{Complex{Float},3*2}
     scaled_op = ncon((l.wdag.elem, l.wdag.elem, l.wdag.elem,
     l.udag.elem, l.udag.elem,
     op,
@@ -183,11 +183,11 @@ function descend_threesite_left(op::Array{Complex{Float64},3*2}, l::Layer)
     return scaled_op
 end
 
-function descend_threesite_symm(op::Array{Complex{Float64},3*2}, l::Layer)
-    return 0.5*( descend_threesite_left(op,l)+descend_threesite_right(op,l) )
+function descend_threesite_symm(op::Array{Complex{Float},3*2}, l::Layer)
+    return convert(Float,0.5)*( descend_threesite_left(op,l)+descend_threesite_right(op,l) )
 end
 
-function ascendTo(op::Array{Complex{Float64},3*2},m::MERA,EvalScale::Int64)
+function ascendTo(op::Array{Complex{Float},3*2},m::MERA,EvalScale::Int64)
     opAtEvalScale = op
     for i in collect(1:EvalScale)
         opAtEvalScale = ascend_threesite_symm(opAtEvalScale,m.levelTensors[i])

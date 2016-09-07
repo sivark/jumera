@@ -9,7 +9,7 @@
 
 using JLD
 
-function improveU(h_layer::Array{Complex{Float64},6}, l::Layer, rho_layer::Array{Complex{Float64},6}, params::Dict)
+function improveU(h_layer::Array{Complex{Float},6}, l::Layer, rho_layer::Array{Complex{Float},6}, params::Dict)
     u = l.u.elem
     u_dg = l.udag.elem
     w = l.w.elem
@@ -88,7 +88,7 @@ function improveU(h_layer::Array{Complex{Float64},6}, l::Layer, rho_layer::Array
     return u
 end
 
-function improveW(h_layer::Array{Complex{Float64},6}, l::Layer, rho_layer::Array{Complex{Float64},6}, params::Dict)
+function improveW(h_layer::Array{Complex{Float},6}, l::Layer, rho_layer::Array{Complex{Float},6}, params::Dict)
     u = l.u.elem
     u_dg = l.udag.elem
     w = l.w.elem
@@ -184,7 +184,7 @@ function improveW(h_layer::Array{Complex{Float64},6}, l::Layer, rho_layer::Array
     return w
 end
 
-function improveLayer(h_layer::Array{Complex{Float64},6}, l::Layer, rho_layer::Array{Complex{Float64},6}, params::Dict)
+function improveLayer(h_layer::Array{Complex{Float},6}, l::Layer, rho_layer::Array{Complex{Float},6}, params::Dict)
     for i in 1:params[:Qlayer]
         #println(size(h_layer),"improvelayer",i)
         u = improveU(h_layer, l, rho_layer, params)
@@ -194,7 +194,7 @@ function improveLayer(h_layer::Array{Complex{Float64},6}, l::Layer, rho_layer::A
     return l
 end
 
-function improveTop(h_layer::Array{Complex{Float64},6}, m::MERA)
+function improveTop(h_layer::Array{Complex{Float},6}, m::MERA)
     # Imposing periodic BCs
     h_pdBC = (ncon((h_layer), ([-100,-200,-300,-400,-500,-600]))
 				+ ncon((h_layer), ([-300,-100,-200,-600,-400,-500]))
@@ -224,7 +224,7 @@ end
 
 # Write a function to train the n coarsest layers, and also the top tensor
 # By default, the number of layers is the whole MERA
-function improveGraft!(h_base::Array{Complex{Float64},6}, m::MERA, params::Dict, top_n=length(m.levelTensors))
+function improveGraft!(h_base::Array{Complex{Float},6}, m::MERA, params::Dict, top_n=length(m.levelTensors))
     #uw_list = m.levelTensors
     H = reshape(h_base, (8*8*8,8*8*8))
     D, V = eig(Hermitian(H))

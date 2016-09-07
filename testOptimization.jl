@@ -16,6 +16,12 @@ isingH, Dmax = build_H_Ising();
 parameters_init  = Dict(:energyDelta => 1e-8, :Qsweep => 601 , :Qlayer => 5, :Qsingle => 4);
 parameters_graft = Dict(:energyDelta => 1e-8, :Qsweep => 1001, :Qlayer => 3, :Qsingle => 2);
 parameters_sweep = Dict(:energyDelta => 1e-8, :Qsweep => 401 , :Qlayer => 4, :Qsingle => 3);
+# If we use Float32 then precision less than approximately 1e-7 is meaningless
+# This will/should render :EnergyDelta check pointless -- so remove that?
+# Should we optimize a multi-layer MERA with Float32 first
+# and then promote it to Float64 for fine-tuning sweeps?
+typealias Float Float32
+@show(Float)
 
 const LAYER_SHAPE       = (8,5,5,5,5,5,5,5,5,5)
 const INIT_LAYERS       = 2

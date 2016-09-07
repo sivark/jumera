@@ -13,9 +13,6 @@ isingH, Dmax = build_H_Ising();
 # TRAINING HYPER-PARAMETERS
 #----------------------------------------------------------------------------
 
-parameters_init  = Dict(:energyDelta => 1e-8, :Qsweep => 601 , :Qlayer => 5, :Qsingle => 4);
-parameters_graft = Dict(:energyDelta => 1e-8, :Qsweep => 1001, :Qlayer => 3, :Qsingle => 2);
-parameters_sweep = Dict(:energyDelta => 1e-8, :Qsweep => 401 , :Qlayer => 4, :Qsingle => 3);
 # If we use Float32 then precision less than approximately 1e-7 is meaningless
 # This will/should render :EnergyDelta check pointless -- so remove that?
 # Should we optimize a multi-layer MERA with Float32 first
@@ -24,6 +21,10 @@ typealias Float Float32
 @show(Float)
 
 const LAYER_SHAPE       = (8,5,5,5,5,5,5,5,5,5)
+parameters_init  = Dict(:EnergyDelta => 1e-8, :Qsweep => 12 , :Qbatch => 50 , :Qlayer => 5, :Qsingle => 4);
+parameters_graft = Dict(:EnergyDelta => 1e-8, :Qsweep => 20, :Qbatch => 50 , :Qlayer => 3, :Qsingle => 2);
+parameters_sweep = Dict(:EnergyDelta => 1e-8, :Qsweep => 8 , :Qbatch => 50 , :Qlayer => 4, :Qsingle => 3);
+
 const INIT_LAYERS       = 2
 const INIT_LAYER_SHAPE  = LAYER_SHAPE[1:(INIT_LAYERS+1)]
 

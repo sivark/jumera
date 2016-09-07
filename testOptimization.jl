@@ -2,13 +2,6 @@ println("Hello, World.")
 
 using JLD
 
-include("BinaryMERA.jl")
-include("OptimizeMERA.jl")
-include("IsingHam.jl")
-
-println("Going to build the Ising micro hamiltonian.")
-isingH, Dmax = build_H_Ising();
-
 #----------------------------------------------------------------------------
 # TRAINING HYPER-PARAMETERS
 #----------------------------------------------------------------------------
@@ -20,11 +13,13 @@ isingH, Dmax = build_H_Ising();
 typealias Float Float32
 @show(Float)
 
-const LAYER_SHAPE       = (8,5,5,5,5,5,5,5,5,5)
+# :EnergyDelta per sweep is set to 1e-8 because it will then take
+# O(1000) iterations to improve the accuracy of the energy by 1e-5
 parameters_init  = Dict(:EnergyDelta => 1e-8, :Qsweep => 12 , :Qbatch => 50 , :Qlayer => 5, :Qsingle => 4);
 parameters_graft = Dict(:EnergyDelta => 1e-8, :Qsweep => 20, :Qbatch => 50 , :Qlayer => 3, :Qsingle => 2);
 parameters_sweep = Dict(:EnergyDelta => 1e-8, :Qsweep => 8 , :Qbatch => 50 , :Qlayer => 4, :Qsingle => 3);
 
+const LAYER_SHAPE       = (8,fill(5,8)...)
 const INIT_LAYERS       = 2
 const INIT_LAYER_SHAPE  = LAYER_SHAPE[1:(INIT_LAYERS+1)]
 
@@ -37,6 +32,17 @@ println(string(map((x) -> '-', collect(1:28))...))
 println()
 
 #----------------------------------------------------------------------------
+# Including MERA code
+#----------------------------------------------------------------------------
+
+include("IsingHam.jl")
+include("BinaryMERA.jl")
+include("OptimizeMERA.jl")
+
+println("Going to build the Ising micro hamiltonian.")
+isingH, Dmax = build_H_Ising();
+
+#----------------------------------------------------------------------------
 # PRE-TRAINING
 #----------------------------------------------------------------------------
 
@@ -46,7 +52,7 @@ println()
 
 m = generate_random_MERA(INIT_LAYER_SHAPE);
 println("Starting the optimization...")
-improveGraft!(isingH, m, parameters_init)
+energy2lyr = improveGraft!(isingH, m, parameters_init)
 save("solutionMERA_$(INIT_LAYERS)layers_$(INIT_LAYER_SHAPE)shape.jld", "m_$(INIT_LAYERS)layers", m)
 println(string(map((x) -> '-', collect(1:28))...))
 

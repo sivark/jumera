@@ -238,8 +238,7 @@ function improveGraft!(h_base::Array{Complex{Float},6}, m::MERA, params::Dict, t
     rhoslist_partial_rev = buildReverseRhosList(m, top_n-1)
     rhoslist_snapshots   = []
 
-    fractional_energy_change    = 1;
-    energyPerSiteOld            = 0;
+    fractional_energy_change    = convert(Float,1.0);
     energyPerSiteOld            = convert(Float,0.0);
     energyPerSite               = convert(Float,0.0);
     i = 1;

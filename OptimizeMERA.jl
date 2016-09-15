@@ -272,10 +272,6 @@ function improveGraft!(h_base::Array{Complex{Float},6}, m::MERA, params::Dict, t
         i+=1;
     end
 
-    jldopen("rhoslist_snapshots_$(length(m.levelTensors))layers.jld","r+") do file
-        write(file, "rhoslist_snapshots_$(top_n)smoothing", rhoslist_snapshots)
-    end
-    
     println(string(map((x) -> '-', collect(1:28))...))
-    return energyPerSite
+    return rhoslist_snapshots
 end

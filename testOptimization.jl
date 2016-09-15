@@ -73,21 +73,23 @@ for lyr in (INIT_LAYERS+1):(length(LAYER_SHAPE)-1)
     # since they must be the same at the critical point, etc...
     # but local "gauge" freedom will probably make that quite useless
 
-    # Improving the newly added layer and the top tensor
-    energy_persite = improveGraft!(isingH, m, parameters_graft, 1)
-    # It's important to iterate over the top layer several times,
-    # otherwise it will wreck the lower layers when we sweep!
+    jldopen("rhoslist_snapshots_$(length(m.levelTensors))layers.jld","w") do file
+        # Improving the newly added layer and the top tensor
+        rhoslist_snapshots1 = improveGraft!(isingH, m, parameters_graft, 1)
+        # It's important to iterate over the top layer several times,
+        # otherwise it will wreck the lower layers when we sweep!
+        write(file, "rhoslist_snapshots_1smoothing", rhoslist_snapshots1)
 
-    energy_persite = improveGraft!(isingH, m, parameters_sweep, 2)
-    #energy_persite = improveGraft!(isingH, m, parameters_sweep, 3)
-    #energy_persite = improveGraft!(isingH, m, parameters_sweep, 4)
+        rhoslist_snapshots2 = improveGraft!(isingH, m, parameters_sweep, 2)
+        write(file, "rhoslist_snapshots_2smoothing", rhoslist_snapshots2)
 
-    # sweep over all layers
-    energy_persite = improveGraft!(isingH, m, parameters_sweep)
+        rhoslist_snapshots3 = improveGraft!(isingH, m, parameters_shortsweep, 3)
+        write(file, "rhoslist_snapshots_3smoothing", rhoslist_snapshots3)
 
-    println("\nFinal energy of this optimized MERA: ", energy_persite)
-    println("Not always exact per-site energy for this depth: ", exact_persite,"\n")
-    println("Fractional error in our variational estimate: ", (energy_persite - exact_persite)/(exact_persite) )
+        # sweep over all layers
+        rhoslist_snapshotsAll = improveGraft!(isingH, m, parameters_sweep)
+        write(file, "rhoslist_snapshots_$(lyr)smoothing", rhoslist_snapshotsAll)
+    end
 
     save("solutionMERA_$(lyr)layers_$(LAYER_SHAPE[1:lyr+1])shape.jld", "m_$(lyr)layers", m)
     println(string(map((x) -> '-', collect(1:28))...))

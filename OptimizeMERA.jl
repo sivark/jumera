@@ -265,7 +265,7 @@ function improveGraft!(h_base::Array{Complex{Float},6}, m::MERA, params::Dict, t
         end
 
         #print status at the end of every BATCH
-        @printf "%4d iter: E = %1.09f , rate of change = %1.1e , fractional error = %1.1e\n" i*params[:Qbatch] energyPerSite fractional_energy_change fractional_energy_error(energy_persite, len)
+        @printf "%4d iter: E = %1.11f , rate of change = %1.1e , fractional error = %1.1e\n" i*params[:Qbatch] energyPerSite fractional_energy_change fractional_energy_error(energyPerSite, len)
         push!(rhoslist_snapshots,   (buildReverseRhosList(m) |> reverse)   )
         # Pushes the full rhoslist instead of just the top few layers we used
 

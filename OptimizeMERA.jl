@@ -277,3 +277,13 @@ function improveGraft!(h_base::Array{Complex{Float},6}, m::MERA, params::Dict, t
     println(string(map((x) -> '-', collect(1:28))...))
     return rhoslist_snapshots
 end
+
+# DO NOT USE FOR NOW
+# function floatlenprint()
+#     # Assuming fprintf() convention???
+#     if (Float == Float32)
+#         return ASCIIString("f")
+#     elseif (Float == Float64)
+#         return ASCIIString("lf")
+#     end
+# end

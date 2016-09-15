@@ -229,7 +229,6 @@ function improveGraft!(h_base::Array{Complex{Float},6}, m::MERA, params::Dict, t
     H = reshape(h_base, (8*8*8,8*8*8))
     D, V = eig(Hermitian(H))
     D_max = D[end]
-    energyPerSite = 0.0
 
     len = length(m.levelTensors)
     h_layer = ascendTo(h_base, m, (length(m.levelTensors)-top_n) )
@@ -237,10 +236,12 @@ function improveGraft!(h_base::Array{Complex{Float},6}, m::MERA, params::Dict, t
 
     # we need the state only at levels coarser than the ones we're training
     rhoslist_partial_rev = buildReverseRhosList(m, top_n-1)
-    rhoslist_snapshots = []
+    rhoslist_snapshots   = []
 
     fractional_energy_change    = 1;
     energyPerSiteOld            = 0;
+    energyPerSiteOld            = convert(Float,0.0);
+    energyPerSite               = convert(Float,0.0);
     i = 1;
     while (i<=params[:Qsweep] && fractional_energy_change>params[:EnergyDelta])
         for b in 1:params[:Qbatch]

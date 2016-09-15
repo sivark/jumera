@@ -1,5 +1,3 @@
-println("Hello, World.")
-
 using JLD
 
 #----------------------------------------------------------------------------
@@ -10,23 +8,25 @@ using JLD
 # This will/should render :EnergyDelta check pointless -- so remove that?
 # Should we optimize a multi-layer MERA with Float32 first
 # and then promote it to Float64 for fine-tuning sweeps?
-typealias Float Float32
+typealias Float Float64
 @show(Float)
+
+const CHI               = 5
+const LAYER_SHAPE       = (8,fill(CHI,7)...)
+const INIT_LAYERS       = 3
+const INIT_LAYER_SHAPE  = LAYER_SHAPE[1:(INIT_LAYERS+1)]
 
 # :EnergyDelta per sweep is set to 1e-8 because it will then take
 # O(1000) iterations to improve the accuracy of the energy by 1e-5
-parameters_init  = Dict(:EnergyDelta => 1e-8, :Qsweep => 12 , :Qbatch => 50 , :Qlayer => 5, :Qsingle => 4);
-parameters_graft = Dict(:EnergyDelta => 1e-8, :Qsweep => 20, :Qbatch => 50 , :Qlayer => 3, :Qsingle => 2);
-parameters_sweep = Dict(:EnergyDelta => 1e-8, :Qsweep => 8 , :Qbatch => 50 , :Qlayer => 4, :Qsingle => 3);
-
-const LAYER_SHAPE       = (8,fill(5,8)...)
-const INIT_LAYERS       = 2
-const INIT_LAYER_SHAPE  = LAYER_SHAPE[1:(INIT_LAYERS+1)]
+parameters_init  = Dict(:EnergyDelta => 1e-8, :Qsweep => 12, :Qbatch => 50, :Qlayer => 4, :Qsingle => 4);
+parameters_graft = Dict(:EnergyDelta => 1e-8, :Qsweep => 20, :Qbatch => 50, :Qlayer => 4, :Qsingle => 5);
+parameters_sweep = Dict(:EnergyDelta => 1e-8, :Qsweep => 20, :Qbatch => 50, :Qlayer => 3, :Qsingle => 5);
+parameters_shortsweep = Dict(:EnergyDelta => 1e-10, :Qsweep => 2, :Qbatch => 50, :Qlayer => 3, :Qsingle => 5);
 
 # Print out the hyperparameters
 println("Shape of init layers -- ", INIT_LAYER_SHAPE)
-println("Initial optimization -- ", parameters_init)
-println("Layer optimization -- ", parameters_graft)
+println("Init  optimization -- ", parameters_init )
+println("Graft optimization -- ", parameters_graft)
 println("Sweep optimization -- ", parameters_sweep)
 println(string(map((x) -> '-', collect(1:28))...))
 println()
@@ -52,9 +52,10 @@ isingH, Dmax = build_H_Ising();
 
 m = generate_random_MERA(INIT_LAYER_SHAPE);
 println("Starting the optimization...")
-energy2lyr = improveGraft!(isingH, m, parameters_init)
+improveGraft!(isingH, m, parameters_init)
+# Not storing rhoslist to disk, for INIT_LAYERS
 save("solutionMERA_$(INIT_LAYERS)layers_$(INIT_LAYER_SHAPE)shape.jld", "m_$(INIT_LAYERS)layers", m)
-println(string(map((x) -> '-', collect(1:28))...))
+#println(string(map((x) -> '-', collect(1:28))...))
 
 
 #----------------------------------------------------------------------------
@@ -91,6 +92,9 @@ for lyr in (INIT_LAYERS+1):(length(LAYER_SHAPE)-1)
         write(file, "rhoslist_snapshots_$(lyr)smoothing", rhoslist_snapshotsAll)
     end
 
+    # println("\nFinal energy of this optimized MERA: ", energy_persite)
+    # println("Not always exact per-site energy for this depth: ", exact_persite,"\n")
+    # println("Fractional error in our variational estimate: ", (energy_persite - exact_persite)/(exact_persite) )
     save("solutionMERA_$(lyr)layers_$(LAYER_SHAPE[1:lyr+1])shape.jld", "m_$(lyr)layers", m)
     println(string(map((x) -> '-', collect(1:28))...))
     println()

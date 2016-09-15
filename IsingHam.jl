@@ -24,6 +24,8 @@ function build_H_Ising(h=1.0)
     H = H - eye(2^9)*D_max
     h = reshape(H, (8,8,8,8,8,8)) |> complex
     return h, D_max
+    # Several objects here are not "Float", but the returned values
+    # should be correctly converted because of type declaration
 end
 
 function approximate_energy_persite_PBC(nsites)

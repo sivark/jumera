@@ -237,11 +237,13 @@ function improveGraft!(h_base::Array{Complex{Float},6}, m::MERA, params::Dict, t
     # we need the state only at levels coarser than the ones we're training
     rhoslist_partial_rev = buildReverseRhosList(m, top_n-1)
     rhoslist_snapshots   = []
+    # Array(Array(Array{Complex{Float},6},len),:Qsweep)
 
     fractional_energy_change    = convert(Float,1.0);
     energyPerSiteOld            = convert(Float,0.0);
     energyPerSite               = convert(Float,0.0);
     i = 1;
+    #while(i<=params[:Qsweep] || fractional_energy_change>params[:EnergyDelta])
     while (i<=params[:Qsweep] && fractional_energy_change>params[:EnergyDelta])
         for b in 1:params[:Qbatch]
             # Ascend Hamiltonian to the layer we want to optimize

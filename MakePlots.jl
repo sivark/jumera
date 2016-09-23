@@ -1,8 +1,12 @@
+#module examineMERA
+
 using JLD
 using Plots
 pyplot()
 #gr()
 
+
+# Put test and profiling also in this module?
 
 function readRhosList(len::Int,n_top)
     rhoslist_list = load("rhoslist_snapshots_$(len)layers.jld", "rhoslist_snapshots_$(n_top)smoothing")

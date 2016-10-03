@@ -165,15 +165,20 @@ abstract TopLayer
 # 2. Use that state to evaluate and return energy
 # 3. Export a method to train the top layer
 
-immutable SILtop <: TopLayer
+immutable TopLayer
     levelTensors::Layer
     state::Array{Complex{Float},6} # 3-site RDM
 end
 
-immutable nonSILtop <: TopLayer
-    levelTensors::Layer
-    state::Array{Complex{Float},6} # 3-site RDM
-end
+# immutable SILtop <: TopLayer
+#     levelTensors::Layer
+#     state::Array{Complex{Float},6} # 3-site RDM
+# end
+#
+# immutable nonSILtop <: TopLayer
+#     levelTensors::Layer
+#     state::Array{Complex{Float},6} # 3-site RDM
+# end
 
 function generate_random_SILtop(chi)
     levelTensors = generate_random_layer(chi_lower,chi_upper)

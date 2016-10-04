@@ -305,3 +305,40 @@ function improveNonSILtop(h_below::Array{Complex{Float},6}, t::TopLayer, params)
 
     return newTopLayer, threeSiteEnergy
 end
+
+# Assumes that ScaleInvariant is at the top of the MERA
+function improveSILtop(h_in::Array{Complex{Float},6}, t::TopLayer, params::Dict)
+    # Get layer tensors, hamiltonian at the start of layer
+    sil = t.levelTensors
+    rho_top = t.state
+
+    for ctr in 1:params[:Qlayer]
+        # Resum hamiltonian to include number of layers we'd like to keep track of, in geometric weight
+        # Idea being that we actually need infinity, but were truncating for practicality
+        function resum(h,n_resum::Int64=3)
+            h_resummed = h_in;
+            # In principle, we must construct a list of h_level and then evaluate on each level.
+            # But assuming scale invariance and linear operation of state_layer on h_layer we can factor out state_layer
+            for r in 1:n_resum
+                h_resummed = h_in + (0.5)*ascend_threesite_symm(h_resummed,sil)
+            end
+            h_resummed = h_resummed / (n_resum + 1)
+            #resum=0 gives the usual result
+            return h_resummed
+        end
+
+        # Improve layer with this resummed hamiltonian
+        sil = improveLayer(     resum(h_in, 3) , sil, rho_fp, params)
+
+        # Construct state to be the fixed-point of the descending superoperator
+        # Plausibly, the finite-size topTensor we've found has some overlap with the thermodynamic ground state
+        # Instead of supplying this, should we supply the identity instead?
+        rho_top = fixedpoint(    Dsop(sil) , seed_state=buildReverseRhosList(m, 0)  );
+
+    end
+
+    threeSiteEnergy = expectation(  ascend_threesite_symm(h_in, sil), rho_top)
+
+    newTopLayer = TopLayer(sil,rho_top)
+    return newTopLayer
+end

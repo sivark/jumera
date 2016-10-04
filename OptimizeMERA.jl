@@ -194,36 +194,28 @@ function improveLayer(h_layer::Array{Complex{Float},6}, l::Layer, rho_layer::Arr
     return l
 end
 
-function improveTop(h_layer::Array{Complex{Float},6}, m::MERA)
-    # Imposing periodic BCs
-    h_pdBC = (ncon((h_layer), ([-100,-200,-300,-400,-500,-600]))
-				+ ncon((h_layer), ([-300,-100,-200,-600,-400,-500]))
-				+ ncon((h_layer), ([-200,-300,-100,-500,-600,-400])) )/3
-    # pulling out the lowest energy eigenvector?
-    E,U = tensoreig(h_pdBC, [1,2,3], [4,5,6], hermitian=true)
-    newTop = U[:,:,:,1]
-    threeSiteEnergy = E[1]
-    return newTop, threeSiteEnergy
-    #println(energy,"improveTop")
-end
-
 function buildReverseRhosList(m::MERA, top_n=length(m.levelTensors))
     # Specify the number of EvalScales sought. If not provided, defaults to all EvalScales
     # evalscale starts at zero below layer1
     uw_list=m.levelTensors;
     totLayers = length(uw_list)
-    stateAtEvalScale = ncon((conj(m.topTensor),m.topTensor),([-100,-200,-300],[-400,-500,-600])) |> complex
-    rhosListReverse = [];
+    stateAtEvalScale = getTopState(m)
+    rhosListReverse = [m.topLayer.state];
     push!(rhosListReverse,stateAtEvalScale)
+
     for j in reverse((totLayers-top_n+1):totLayers)
         stateAtEvalScale = descend_threesite_symm(stateAtEvalScale,uw_list[j])
         push!(rhosListReverse,stateAtEvalScale)
     end
+
+    # Returns state above TopLayer and then the next n_top states
+    # To get the state at later x, with zero at the topmost layer, access rhosListReverse[1+x]
     return rhosListReverse
 end
 
 # Write a function to train the n coarsest layers, and also the top tensor
 # By default, the number of layers is the whole MERA
+# Non scale invariant MERA
 function improveGraft!(h_base::Array{Complex{Float},6}, m::MERA, params::Dict, top_n=length(m.levelTensors))
     #uw_list = m.levelTensors
     H = reshape(h_base, (8*8*8,8*8*8))
@@ -251,11 +243,11 @@ function improveGraft!(h_base::Array{Complex{Float},6}, m::MERA, params::Dict, t
 
             # Move to the IR, progressively optimizing the layers we care about
             for j in collect(len-top_n+1:len)
-                m.levelTensors[j] = improveLayer(h_layer, m.levelTensors[j], rhoslist_partial_rev[len-j+1], params)
+                m.levelTensors[j] = improveLayer(h_layer, m.levelTensors[j], rhoslist_partial_rev[len-j+2], params)
                 h_layer = ascend_threesite_symm(h_layer,m.levelTensors[j])
                 #println(size(h_layer),"improvegraft")
             end
-            m.topTensor, threeSiteEnergy =  improveTop(h_layer, m)
+            m.topLayer, threeSiteEnergy =  improveNonSILtop(h_layer, m.topLayer)
             #println(threeSiteEnergy,"improveGraft!")
             energyPerSite = (threeSiteEnergy + Dmax)/3
 
@@ -287,3 +279,29 @@ end
 #         return ASCIIString("lf")
 #     end
 # end
+
+function improveNonSILtop(h_below::Array{Complex{Float},6}, t::TopLayer, params)
+    threeSiteEnergy = 0.0
+    rhoTop = t.state
+    for i in 1:params[:Qlayer]
+        newLevelTensors = improveLayer(h_below, t.levelTensors, rhoTop, params)
+
+        h_above = ascend_threesite_symm(h_below, t.levelTensors)
+
+        # Imposing periodic BCs
+        h_pdBC = (ncon((h_above), ([-100,-200,-300,-400,-500,-600]))
+    				+ ncon((h_above), ([-300,-100,-200,-600,-400,-500]))
+    				+ ncon((h_above), ([-200,-300,-100,-500,-600,-400])) )/3
+
+        # pulling out the lowest energy eigenvector
+        E,U = tensoreig(h_pdBC, [1,2,3], [4,5,6], hermitian=true)
+        newTopTensor = U[:,:,:,1]
+        rhoTop = dm4pureState(newTopTensor)
+        threeSiteEnergy = E[1]
+    end
+
+    newTopLayer = TopLayer(newLevelTensors,newTopTensor)
+    # This needs to differentiate between SIL and nonSIL
+
+    return newTopLayer, threeSiteEnergy
+end

@@ -315,6 +315,10 @@ function dm4pureState(pureState)
     return dm
 end
 
+function getTopState(m::MERA)
+    return descend_threesite_symm(m.topLayer.state, m.topLayer.levelTensors)
+end
+
 # Maybe one can improve on the Power method by the Lanczos method?
 function fixedpoint(Sop; seed_state=threesiteeye(chi), loop::Int64=10)
     # Sop is the operator whose fixed-point we seek

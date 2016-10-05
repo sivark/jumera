@@ -180,14 +180,27 @@ end
 #     state::Array{Complex{Float},6} # 3-site RDM
 # end
 
-function generate_random_SILtop(chi)
-    levelTensors = generate_random_layer(chi_lower,chi_upper)
-    state = fixedpoint(idOp, levelTensors)
+# function generate_random_SILtop(chi)
+#     levelTensors = generate_random_layer(chi_lower,chi_upper)
+#     state = fixedpoint(idOp, levelTensors)
+#
+#     return nonSILtop(levelTensors,state)
+# end
+#
+# function generate_random_nonSILtop(chi_lower,chi_upper)
+#     levelTensors::Layer
+#     state::Array{Complex{Float},6}
+#
+#     top= randn(ntuple(_ -> chi, 3)...)
+#     top /= vecnorm(top)
+#
+#     levelTensors = generate_random_layer(chi_lower,chi_upper)
+#     state = dm4pureState(top)
+#
+#     return nonSILtop(levelTensors,state)
+# end
 
-    return nonSILtop(levelTensors,state)
-end
-
-function generate_random_nonSILtop(chi_lower,chi_upper)
+function generate_random_top(chi_lower,chi_upper)
     levelTensors::Layer
     state::Array{Complex{Float},6}
 
@@ -197,13 +210,7 @@ function generate_random_nonSILtop(chi_lower,chi_upper)
     levelTensors = generate_random_layer(chi_lower,chi_upper)
     state = dm4pureState(top)
 
-    return nonSILtop(levelTensors,state)
-end
-
-function getState(t::SILtop)
-end
-
-function getState(t::nonSILtop)
+    return TopLayer(levelTensors,state)
 end
 
 #Should I generate a "random" state in the constructor and then compute

@@ -200,7 +200,8 @@ function buildReverseRhosList(m::MERA, top_n=length(m.levelTensors))
     uw_list=m.levelTensors;
     totLayers = length(uw_list)
     stateAtEvalScale = getTopState(m)
-    rhosListReverse = [m.topLayer.state];
+    rhosListReverse = [];
+    push!(rhosListReverse,m.topLayer.state)
     push!(rhosListReverse,stateAtEvalScale)
 
     for j in reverse((totLayers-top_n+1):totLayers)
@@ -241,14 +242,15 @@ function improveGraft!(h_base::Array{Complex{Float},6}, m::MERA, params::Dict, t
             # Ascend Hamiltonian to the layer we want to optimize
             h_layer = ascendTo(h_base, m, (length(m.levelTensors)-top_n) )
 
+            # Starting from the UV because that is where we have useful information about the state (the Hamiltonian)
             # Move to the IR, progressively optimizing the layers we care about
             for j in collect(len-top_n+1:len)
                 m.levelTensors[j] = improveLayer(h_layer, m.levelTensors[j], rhoslist_partial_rev[len-j+2], params)
                 h_layer = ascend_threesite_symm(h_layer,m.levelTensors[j])
                 #println(size(h_layer),"improvegraft")
             end
-            m.topLayer, threeSiteEnergy =  improveNonSILtop(h_layer, m.topLayer)
-            #println(threeSiteEnergy,"improveGraft!")
+            m.topLayer, threeSiteEnergy =  improveNonSILtop(h_layer, m.topLayer, params)
+            m.topLayer, threeSiteEnergy =  improveTopLayer(h_layer, m.topLayer, params)
             energyPerSite = (threeSiteEnergy + Dmax)/3
 
             # Generate new RhosList for next round of optimization
@@ -270,19 +272,11 @@ function improveGraft!(h_base::Array{Complex{Float},6}, m::MERA, params::Dict, t
     return rhoslist_snapshots
 end
 
-# DO NOT USE FOR NOW
-# function floatlenprint()
-#     # Assuming fprintf() convention???
-#     if (Float == Float32)
-#         return ASCIIString("f")
-#     elseif (Float == Float64)
-#         return ASCIIString("lf")
-#     end
-# end
-
 function improveNonSILtop(h_below::Array{Complex{Float},6}, t::TopLayer, params)
     threeSiteEnergy = 0.0
     rhoTop = t.state
+    newLevelTensors = t.levelTensors
+    newTopState = t.state
     for i in 1:params[:Qlayer]
         newLevelTensors = improveLayer(h_below, t.levelTensors, rhoTop, params)
 
@@ -296,18 +290,17 @@ function improveNonSILtop(h_below::Array{Complex{Float},6}, t::TopLayer, params)
         # pulling out the lowest energy eigenvector
         E,U = tensoreig(h_pdBC, [1,2,3], [4,5,6], hermitian=true)
         newTopTensor = U[:,:,:,1]
-        rhoTop = dm4pureState(newTopTensor)
+        newTopState = dm4pureState(newTopTensor)
         threeSiteEnergy = E[1]
     end
 
-    newTopLayer = TopLayer(newLevelTensors,newTopTensor)
+    newTopLayer = TopLayer(newLevelTensors,newTopState)
     # This needs to differentiate between SIL and nonSIL
 
     return newTopLayer, threeSiteEnergy
 end
 
-# Assumes that ScaleInvariant is at the top of the MERA
-function improveSILtop(h_in::Array{Complex{Float},6}, t::TopLayer, params::Dict)
+function improveSILtop(h_below::Array{Complex{Float},6}, t::TopLayer, params::Dict)
     # Get layer tensors, hamiltonian at the start of layer
     sil = t.levelTensors
     rho_top = t.state
@@ -316,11 +309,11 @@ function improveSILtop(h_in::Array{Complex{Float},6}, t::TopLayer, params::Dict)
         # Resum hamiltonian to include number of layers we'd like to keep track of, in geometric weight
         # Idea being that we actually need infinity, but were truncating for practicality
         function resum(h,n_resum::Int64=3)
-            h_resummed = h_in;
+            h_resummed = h;
             # In principle, we must construct a list of h_level and then evaluate on each level.
             # But assuming scale invariance and linear operation of state_layer on h_layer we can factor out state_layer
             for r in 1:n_resum
-                h_resummed = h_in + (0.5)*ascend_threesite_symm(h_resummed,sil)
+                h_resummed = h + (0.5)*ascend_threesite_symm(h_resummed,sil)
             end
             h_resummed = h_resummed / (n_resum + 1)
             #resum=0 gives the usual result
@@ -328,7 +321,7 @@ function improveSILtop(h_in::Array{Complex{Float},6}, t::TopLayer, params::Dict)
         end
 
         # Improve layer with this resummed hamiltonian
-        sil = improveLayer(     resum(h_in, 3) , sil, rho_fp, params)
+        sil = improveLayer(     resum(h_below, 3) , sil, rho_fp, params)
 
         # Construct state to be the fixed-point of the descending superoperator
         # Plausibly, the finite-size topTensor we've found has some overlap with the thermodynamic ground state
@@ -342,3 +335,13 @@ function improveSILtop(h_in::Array{Complex{Float},6}, t::TopLayer, params::Dict)
     newTopLayer = TopLayer(sil,rho_top)
     return newTopLayer
 end
+
+# DO NOT USE FOR NOW
+# function floatlenprint()
+#     # Assuming fprintf() convention???
+#     if (Float == Float32)
+#         return ASCIIString("f")
+#     elseif (Float == Float64)
+#         return ASCIIString("lf")
+#     end
+# end

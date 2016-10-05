@@ -5,8 +5,6 @@
 # This MERA has 2->1 coarse-graining and 3-site local operators
 # -------------------------------------------------------------
 
-
-typealias Float Float64
 using TensorFactorizations
 using TensorOperations
 using NCon
@@ -158,7 +156,7 @@ end
 # ------------------------------------------------------------
 
 
-abstract TopLayer
+#abstract TopLayer
 # This is the parent abstract type
 # All daughters must export methods to:
 # 1. Supply a state for the later below
@@ -204,7 +202,7 @@ function generate_random_top(chi_lower,chi_upper)
     levelTensors::Layer
     state::Array{Complex{Float},6}
 
-    top= randn(ntuple(_ -> chi, 3)...)
+    top= randn(ntuple(_ -> chi_upper, 3)...)
     top /= vecnorm(top)
 
     levelTensors = generate_random_layer(chi_lower,chi_upper)
@@ -346,6 +344,5 @@ function fixedpoint(Sop; seed_state=threesiteeye(chi), loop::Int64=10)
         # How is it that this could possibly return the energy?
         # Only because the levelTensors have been optimized for a particular Hamiltonian :-?
 end
-
 
 #end

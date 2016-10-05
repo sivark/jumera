@@ -1,13 +1,14 @@
 #----------------------------------------------------------------------------
 # TRAINING HYPER-PARAMETERS: PRODUCTION
 # If we use Float32 then precision less than approximately 1e-7 is meaningless
-# This will/should render :EnergyDelta check pointless -- so remove that?
+# This will/should render :EnergyDelta check pointless 
 # Should we optimize a multi-layer MERA with Float32 first
-# and then promote it to Float64 for fine-tuning sweeps?#----------------------------------------------------------------------------
+# and then promote it to Float64 for fine-tuning sweeps?
+#----------------------------------------------------------------------------
 
 
 const CHI               = 5
-const LAYER_SHAPE       = (8,fill(CHI,7))
+const LAYER_SHAPE       = (8,fill(CHI,7)...)
 const INIT_LAYERS       = 3
 const INIT_LAYER_SHAPE  = LAYER_SHAPE[1:(INIT_LAYERS+1)]
 

@@ -1,7 +1,11 @@
 typealias Float Float64
 @show(Float)
 
-include("trainingParams.jl")
+using JLD
+using ArgParse
+# To input FloatType and testing/production flag.
+
+include("testParams.jl")
 
 # Print out the hyperparameters
 println("Shape of init layers -- ", INIT_LAYER_SHAPE)
@@ -22,7 +26,6 @@ include("OptimizeMERA.jl")
 println("Going to build the Ising micro hamiltonian.")
 isingH, Dmax = build_H_Ising();
 
-using JLD
 
 #----------------------------------------------------------------------------
 # PRE-TRAINING

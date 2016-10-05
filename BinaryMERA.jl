@@ -271,10 +271,10 @@ end
 
 function generate_random_MERA(listOfChis)
     uw_list = []
-    for i in 1:(length(listOfChis)-1)
+    for i in 1:(length(listOfChis)-2)
         push!(uw_list, generate_random_layer(listOfChis[i],listOfChis[i+1]) )
     end
-    topTensor = generate_random_top(listOfChis[end])
+    topTensor = generate_random_top(listOfChis[end-1],listOfChis[end])
 
     return MERA(uw_list, topTensor)
 end

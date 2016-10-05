@@ -1,40 +1,13 @@
-using JLD
-
-#----------------------------------------------------------------------------
-# TRAINING HYPER-PARAMETERS
-#----------------------------------------------------------------------------
-
-# If we use Float32 then precision less than approximately 1e-7 is meaningless
-# This will/should render :EnergyDelta check pointless -- so remove that?
-# Should we optimize a multi-layer MERA with Float32 first
-# and then promote it to Float64 for fine-tuning sweeps?
 typealias Float Float64
 @show(Float)
 
-const CHI               = 5
-const LAYER_SHAPE       = (8,3,2,4,3,4,2)
-const INIT_LAYERS       = 3
-const INIT_LAYER_SHAPE  = LAYER_SHAPE[1:(INIT_LAYERS+1)]
-
-# :EnergyDelta per sweep is set to 1e-8 because it will then take
-# O(1000) iterations to improve the accuracy of the energy by 1e-5
-parameters_init  = Dict(:EnergyDelta => 1e-4, :Qsweep => 12, :Qbatch => 5, :Qlayer => 4, :Qsingle => 4);
-parameters_graft = Dict(:EnergyDelta => 1e-4, :Qsweep => 2, :Qbatch => 5, :Qlayer => 4, :Qsingle => 5);
-parameters_sweep = Dict(:EnergyDelta => 1e-4, :Qsweep => 2, :Qbatch => 5, :Qlayer => 3, :Qsingle => 5);
-parameters_shortsweep = Dict(:EnergyDelta => 1e-5, :Qsweep => 2, :Qbatch => 5, :Qlayer => 3, :Qsingle => 5);
-
-# Print out the hyperparameters
-println("Shape of init layers -- ", INIT_LAYER_SHAPE)
-println("Init  optimization -- ", parameters_init )
-println("Graft optimization -- ", parameters_graft)
-println("Sweep optimization -- ", parameters_sweep)
-println(string(map((x) -> '-', collect(1:28))...))
-println()
+using JLD
 
 #----------------------------------------------------------------------------
 # Including MERA code
 #----------------------------------------------------------------------------
 
+include("trainingParams.jl")
 include("IsingHam.jl")
 include("BinaryMERA.jl")
 include("OptimizeMERA.jl")
@@ -63,12 +36,14 @@ save("solutionMERA_$(INIT_LAYERS)layers_$(INIT_LAYER_SHAPE)shape.jld", "m_$(INIT
 #----------------------------------------------------------------------------
 
 for lyr in (INIT_LAYERS+1):(length(LAYER_SHAPE)-1)
-    println("\nNow adding layer number: ", lyr)
+    println("\nNow adding layer number: %2d of bond dimensions %2d -> %2d", lyr, LAYER_SHAPE[lyr], LAYER_SHAPE[lyr+1])
     exact_persite = exact_energy_persite(lyr);
     println("Not always exact per-site energy for this depth: ", exact_persite,"\n")
 
-    newLayer = generate_random_layer(LAYER_SHAPE[lyr],LAYER_SHAPE[lyr+1])
-    push!(m.levelTensors, newLayer)
+    #newLayer = generate_random_layer(LAYER_SHAPE[lyr],LAYER_SHAPE[lyr+1])
+    push!(m.levelTensors, m.topLayer.levelTensors)
+    m.topLayer = generate_random_top(LAYER_SHAPE[lyr],LAYER_SHAPE[lyr+1])
+
     # It is tempting to guess a better initialization for the new layer.
     # Ideally, it is tempting to use the penultimate layer,
     # since they must be the same at the critical point, etc...
@@ -84,8 +59,8 @@ for lyr in (INIT_LAYERS+1):(length(LAYER_SHAPE)-1)
         rhoslist_snapshots2 = improveGraft!(isingH, m, parameters_sweep, 2)
         write(file, "rhoslist_snapshots_2smoothing", rhoslist_snapshots2)
 
-        rhoslist_snapshots3 = improveGraft!(isingH, m, parameters_shortsweep, 3)
-        write(file, "rhoslist_snapshots_3smoothing", rhoslist_snapshots3)
+        #rhoslist_snapshots3 = improveGraft!(isingH, m, parameters_shortsweep, 3)
+        #write(file, "rhoslist_snapshots_3smoothing", rhoslist_snapshots3)
 
         # sweep over all layers
         rhoslist_snapshotsAll = improveGraft!(isingH, m, parameters_sweep)

@@ -277,7 +277,7 @@ function improveNonSILtop(h_below::Array{Complex{Float},6}, t::TopLayer, params)
     rhoTop = t.state
     newLevelTensors = t.levelTensors
     newTopState = t.state
-    for i in 1:params[:Qlayer]
+    for i in 1:params[:Qtop]
         newLevelTensors = improveLayer(h_below, t.levelTensors, rhoTop, params)
 
         h_above = ascend_threesite_symm(h_below, t.levelTensors)
@@ -305,7 +305,7 @@ function improveSILtop(h_below::Array{Complex{Float},6}, t::TopLayer, params::Di
     sil = t.levelTensors
     rho_top = t.state
 
-    for ctr in 1:params[:Qlayer]
+    for ctr in 1:params[:Qtop]
         # Resum hamiltonian to include number of layers we'd like to keep track of, in geometric weight
         # Idea being that we actually need infinity, but were truncating for practicality
         function resum(h,n_resum::Int64=3)

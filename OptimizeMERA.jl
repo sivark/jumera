@@ -215,9 +215,10 @@ function buildReverseRhosList(m::MERA, top_n=length(m.levelTensors))
 end
 
 # Write a function to train the n coarsest layers, and also the top tensor
-# By default, the number of layers is the whole MERA
-# Non scale invariant MERA
-function improveGraft!(h_base::Array{Complex{Float},6}, m::MERA, params::Dict, top_n=length(m.levelTensors))
+# By default, the number of layers is the whole MERA; and non scale invariant top layer?
+# *Make this a HOfunction that takes in a function for improving the top layer!*
+# Would be wonderful if functions have useful type information! :P
+function improveGraft!(improveTopLayer::Function,h_base::Array{Complex{Float},6}, m::MERA, params::Dict, top_n=length(m.levelTensors))
     #uw_list = m.levelTensors
     H = reshape(h_base, (8*8*8,8*8*8))
     D, V = eig(Hermitian(H))
@@ -249,7 +250,6 @@ function improveGraft!(h_base::Array{Complex{Float},6}, m::MERA, params::Dict, t
                 h_layer = ascend_threesite_symm(h_layer,m.levelTensors[j])
                 #println(size(h_layer),"improvegraft")
             end
-            m.topLayer, threeSiteEnergy =  improveNonSILtop(h_layer, m.topLayer, params)
             m.topLayer, threeSiteEnergy =  improveTopLayer(h_layer, m.topLayer, params)
             energyPerSite = (threeSiteEnergy + Dmax)/3
 
@@ -295,7 +295,6 @@ function improveNonSILtop(h_below::Array{Complex{Float},6}, t::TopLayer, params)
     end
 
     newTopLayer = TopLayer(newLevelTensors,newTopState)
-    # This needs to differentiate between SIL and nonSIL
 
     return newTopLayer, threeSiteEnergy
 end

@@ -272,7 +272,9 @@ function improveGraft!(improveTopLayer::Function,h_base::Array{Complex{Float},6}
     return rhoslist_snapshots
 end
 
-function improveNonSILtop(h_below::Array{Complex{Float},6}, t::TopLayer, params)
+function improveNonSILtop(h_below::Array{Complex{Float},6}, t::TopLayer, params::Dict)
+    newTopLayer::TopLayer
+    threeSiteEnergy::Float
     threeSiteEnergy = 0.0
     rhoTop = t.state
     newLevelTensors = t.levelTensors
@@ -300,6 +302,8 @@ function improveNonSILtop(h_below::Array{Complex{Float},6}, t::TopLayer, params)
 end
 
 function improveSILtop(h_below::Array{Complex{Float},6}, t::TopLayer, params::Dict)
+    newTopLayer::TopLayer
+    threeSiteEnergy::Float
     # Get layer tensors, hamiltonian at the start of layer
     sil = t.levelTensors
     rho_top = t.state
@@ -320,19 +324,19 @@ function improveSILtop(h_below::Array{Complex{Float},6}, t::TopLayer, params::Di
         end
 
         # Improve layer with this resummed hamiltonian
-        sil = improveLayer(     resum(h_below, 3) , sil, rho_fp, params)
+        sil = improveLayer(     resum(h_below, 3) , sil, rho_top, params)
 
         # Construct state to be the fixed-point of the descending superoperator
         # Plausibly, the finite-size topTensor we've found has some overlap with the thermodynamic ground state
         # Instead of supplying this, should we supply the identity instead?
-        rho_top = fixedpoint(    Dsop(sil) , seed_state=buildReverseRhosList(m, 0)  );
-
+        rho_top = fixedpoint(    Dsop(sil) , seed_state=rho_top  );
     end
 
-    threeSiteEnergy = expectation(  ascend_threesite_symm(h_in, sil), rho_top)
-
+    # NCon returns a complex number; we expect the energy to be real
+    threeSiteEnergy = real(expectation(  ascend_threesite_symm(h_below, sil), rho_top))
     newTopLayer = TopLayer(sil,rho_top)
-    return newTopLayer
+
+    return newTopLayer, threeSiteEnergy
 end
 
 function growMERA!(m::MERA,LAYER_SHAPE,INIT_LAYERS)

@@ -3,7 +3,7 @@
 #----------------------------------------------------------------------------
 
 const CHI               = 5
-const LAYER_SHAPE       = (8,3,2,4,3,4,2)
+const LAYER_SHAPE       = (8,3,2,2,3,4,2)
 const INIT_LAYERS       = 3
 const INIT_LAYER_SHAPE  = LAYER_SHAPE[1:(INIT_LAYERS+1)]
 

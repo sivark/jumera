@@ -263,7 +263,8 @@ function expectation(op,rho)
     # Need operator and rho to be given at the same scale
     # Scale for operators is 1-indexed while
     # Scale for states is 0-indexed at the ultraviolet cutoff
-    result = ncon((op,rho),([1,2,3,4,5,6],[4,5,6,1,2,3]))
+    result = ncon((op,rho),([1,2,3,4,5,6],[4,5,6,1,2,3]))[1]
+    # NCon returns a zero dimensional array, and we're pulling out the first element
     return result
 end
 

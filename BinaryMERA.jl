@@ -367,4 +367,43 @@ function buildReverseRhosList(m::MERA, top_n=length(m.levelTensors))
     return rhosListReverse
 end
 
+function getLayerList(m::MERA;topRepeat::Int64=1)
+    local layers::Array{Layer,1}
+    layers = copy(m.levelTensors)
+    append!(layers, fill(m.topLayer.levelTensors,topRepeat))
+    return layers
+end
+
+function hamSpectrumLayerwise(h_base,layers::Array{Layer,1};downshift::Float=0.0)
+    function sqreshape(op)
+        l = length(op) |> sqrt |> Int
+        return reshape(op,(l,l))
+    end
+
+    function findspectrum(op;spectrum_downshift::Float=0.0)
+        D, V = eig(Hermitian(   0.5*(sqreshape(op)+sqreshape(conj(op))  )  ))
+        return (D .+ spectrum_downshift) ./ 3
+        # Since we're feeding in a three-site operator
+    end
+
+    spectrum_0 = findspectrum(h_base;spectrum_downshift=downshift)
+    spectrum_list = [spectrum_0]
+    h_layer = h_base
+    for i in 1:length(layers)
+        # Step the Hamiltonian up for the next iteration and find its spectrum
+        h_layer = ascend_threesite_symm(h_layer, layers[i])
+        spectrum_i = h_layer |> (x -> findspectrum(x;spectrum_downshift=downshift))
+        # Push into container
+        spectrum_list = [spectrum_list...,spectrum_i]
+        # Model as Array{Any,1} (currently used) or as tuple of tuples?
+        # or use DataArray or DataFrame
+    end
+
+    #spectrum_end = ascend_threesite_symm(h_layer, m.topLayer.levelTensors) |> findspectrum
+    #spectrum_list = [spectrum_list...,spectrum_end]
+
+    # Return list of lists
+    return spectrum_list
+end
+
 #end

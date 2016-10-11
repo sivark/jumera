@@ -231,7 +231,7 @@ function improveGraft!(improveTopLayer::Function,h_base::Array{Complex{Float},6}
     # we need the state only at levels coarser than the ones we're training
     rhoslist_partial_rev = buildReverseRhosList(m, top_n-1)
     rhoslist_snapshots   = []
-    # Array(Array(Array{Complex{Float},6},len),:Qsweep)
+    #Array(Array(Array{Complex{Float},6},len),:Qsweep)
 
     fractional_energy_change    = convert(Float,1.0);
     energyPerSiteOld            = convert(Float,0.0);
@@ -270,6 +270,7 @@ function improveGraft!(improveTopLayer::Function,h_base::Array{Complex{Float},6}
 
     println(string(map((x) -> '-', collect(1:28))...))
     return rhoslist_snapshots
+    # Does removing the return value affect the speed of the program?
 end
 
 function improveNonSILtop(h_below::Array{Complex{Float},6}, t::TopLayer, params::Dict)

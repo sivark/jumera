@@ -31,17 +31,19 @@ isingH, Dmax = build_H_Ising();
 # PRE-TRAINING
 #----------------------------------------------------------------------------
 
-## Load already optimized 7-layer MERA
-#    m = load("solutionMERA_7layers_(8,5,5,5,5,5,5,5)shape.jld","m_7layers")
-#    improveGraft!(isingH, m, parameters_init,1)
-
 m = generate_random_MERA(INIT_LAYER_SHAPE);
 println("Starting the optimization...")
-improveGraft!(isingH, m, parameters_init)
-# Not storing rhoslist to disk, for INIT_LAYERS
+improveGraft!(improveNonSILtop,isingH, m, parameters_init)
 save("solutionMERA_$(INIT_LAYERS)layers_$(INIT_LAYER_SHAPE)shape.jld", "m_$(INIT_LAYERS)layers", m)
-#println(string(map((x) -> '-', collect(1:28))...))
 
+## Load already optimized 7-layer MERA
+#m = load("solutionMERA_3layers_(8,3,2,2)shape.jld","m_3layers")
+
+println("Starting scale invariant optimization")
+improveGraft!(improveSILtop,isingH, m, parameters_init)
+save("solutionMERA_$(INIT_LAYERS)layers_$(INIT_LAYER_SHAPE)shape_SILtop.jld", "m_$(INIT_LAYERS)layers", m)
+
+#println(string(map((x) -> '-', collect(1:28))...))
 
 #----------------------------------------------------------------------------
 # GRAFTING AND GROWING A DEEPER MERA

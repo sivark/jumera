@@ -72,7 +72,7 @@ end
 #----# ------------------------------------------------------------
 
 function ascend_threesite_left(op::Array{Complex{Float},3*2}, l::Layer)
-    scaled_op::Array{Complex{Float},3*2}
+    local scaled_op::Array{Complex{Float},3*2}
     scaled_op = ncon((l.w.elem, l.w.elem, l.w.elem,
     l.u.elem, l.u.elem,
     op,
@@ -87,7 +87,7 @@ function ascend_threesite_left(op::Array{Complex{Float},3*2}, l::Layer)
 end
 
 function ascend_threesite_right(op::Array{Complex{Float},3*2}, l::Layer)
-    scaled_op::Array{Complex{Float},3*2}
+    local scaled_op::Array{Complex{Float},3*2}
     scaled_op = ncon((l.w.elem, l.w.elem, l.w.elem,
     l.u.elem, l.u.elem,
     op,
@@ -106,7 +106,7 @@ function ascend_threesite_symm(op::Array{Complex{Float},3*2}, l::Layer)
 end
 
 function descend_threesite_right(op::Array{Complex{Float},3*2}, l::Layer)
-    scaled_op::Array{Complex{Float},3*2}
+    local scaled_op::Array{Complex{Float},3*2}
     scaled_op = ncon((l.wdag.elem, l.wdag.elem, l.wdag.elem,
     l.udag.elem, l.udag.elem,
     op,
@@ -121,7 +121,7 @@ function descend_threesite_right(op::Array{Complex{Float},3*2}, l::Layer)
 end
 
 function descend_threesite_left(op::Array{Complex{Float},3*2}, l::Layer)
-    scaled_op::Array{Complex{Float},3*2}
+    local scaled_op::Array{Complex{Float},3*2}
     scaled_op = ncon((l.wdag.elem, l.wdag.elem, l.wdag.elem,
     l.udag.elem, l.udag.elem,
     op,
@@ -199,8 +199,8 @@ end
 # end
 
 function generate_random_top(chi_lower,chi_upper)
-    levelTensors::Layer
-    state::Array{Complex{Float},6}
+    local levelTensors::Layer
+    local state::Array{Complex{Float},6}
 
     top= randn(ntuple(_ -> chi_upper, 3)...)
     top /= vecnorm(top)
@@ -287,7 +287,7 @@ end
 threesiteeye(chi) = complex(ncon((eye(chi),eye(chi),eye(chi)),([-1,-11], [-2,-12], [-3,-13])));
 
 function random_complex_tensor(chi, rank)
-    res::Array{Complex{Float},rank}
+    local res::Array{Complex{Float},rank}
     real = randn(ntuple(_ -> chi, rank)...)
     imag = randn(ntuple(_ -> chi, rank)...)
     res = real + im*imag

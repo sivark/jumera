@@ -274,8 +274,8 @@ function improveGraft!(improveTopLayer::Function,h_base::Array{Complex{Float},6}
 end
 
 function improveNonSILtop(h_below::Array{Complex{Float},6}, t::TopLayer, params::Dict)
-    newTopLayer::TopLayer
-    threeSiteEnergy::Float
+    local newTopLayer::TopLayer
+    local threeSiteEnergy::Float
     threeSiteEnergy = 0.0
     rhoTop = t.state
     newLevelTensors = t.levelTensors
@@ -303,8 +303,8 @@ function improveNonSILtop(h_below::Array{Complex{Float},6}, t::TopLayer, params:
 end
 
 function improveSILtop(h_below::Array{Complex{Float},6}, t::TopLayer, params::Dict)
-    newTopLayer::TopLayer
-    threeSiteEnergy::Float
+    local newTopLayer::TopLayer
+    local threeSiteEnergy::Float
     # Get layer tensors, hamiltonian at the start of layer
     sil = t.levelTensors
     rho_top = t.state

@@ -1,8 +1,8 @@
 # Ising model with transverse magnetic field h (critical h=1 by default)
 # Returns three-site Ising Hamiltonian (8x8 matrix), and the highest energy eigenvalue
 function build_H_Ising(h=1.0)
-    h::Array{Complex{Float},6}
-    D_max::Float
+    local h::Array{Complex{Float},6}
+    local D_max::Float
     X = [0 1; 1 0]
     Z = [1 0; 0 -1]
     I = eye(2)

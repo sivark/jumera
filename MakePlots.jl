@@ -32,8 +32,9 @@ function animatedplot(filename::ASCIIString;n_start::Int=1,n_stop::Int=0,n_smoot
             xaxis=("Layer",(0,11),0:1:10),
             yaxis=("Entanglement",(0,8),0:1:8),
             #background_color=RGB(0.3,0.5,0.1)
+            title=("Entanglement -vs- layer");
             );
-    title!("Entanglement -vs- layer");
+    #title!("Entanglement -vs- layer");
     hline!([1.6],line=(0.5,:dash,0.6,:red))
     anim = Animation()
     for n_layers in collect(n_start:n_stop)

@@ -259,7 +259,7 @@ function descendTo(m::MERA,EvalScale::Int)
     return stateAtEvalScale
 end
 
-function expectation(op,rho)
+function expectation(op::Array{Complex{Float64},6},rho::Array{Complex{Float64},6})
     # Need operator and rho to be given at the same scale
     # Scale for operators is 1-indexed while
     # Scale for states is 0-indexed at the ultraviolet cutoff

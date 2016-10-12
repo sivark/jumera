@@ -27,7 +27,7 @@ function entropy(rho3site)
 end
 
 
-function animatedplot(filename::ASCIIString;n_start::Int=1,n_stop::Int=0,n_smoothing_list=())
+function animatedplot(filename::String;n_start::Int=1,n_stop::Int=0,n_smoothing_list=())
     p=plot([],[],legend=false,
             xaxis=("Layer",(0,11),0:1:10),
             yaxis=("Entanglement",(0,8),0:1:8),

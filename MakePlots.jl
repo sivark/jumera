@@ -59,3 +59,18 @@ function animatedplot(filename::String;n_start::Int=1,n_stop::Int=0,n_smoothing_
     return gif(anim,filename,fps=4,loop=1)
 end
 
+function plotHamSpectrumLayerwise(spectrum_list)
+    len = length(spectrum_list)
+    p=plot([0],[0],legend=false,
+    xaxis=("Layer",(-0.5,len-0.5),0:1:(len-1)),
+            yaxis=("Hamiltonian spectrum"),
+            #background_color=RGB(0.3,0.5,0.1)
+            title=("Ham. Spectrum -vs- layer");
+            );
+
+    plotpts=[]
+    for (i,spi) in enumerate(spectrum_list)
+        scatter!((i-1)*ones(spi),spi)
+    end
+    return p
+end

@@ -1,11 +1,15 @@
-using Gadfly  # for plotting
+using Plots
+pyplot()
+
+typealias Float Float64
 
 include("BinaryMERA.jl")
 
 # Global variables in all-caps
-LAYERS = 8;
-CHI = 3;
-M = generate_random_MERA(CHI,LAYERS);
+const LAYERS = 8;
+const CHI = 3;
+const LIST_OF_CHIS = fill(CHI, LAYERS+2) 
+M = generate_random_MERA(LIST_OF_CHIS);
 
 ARANDOMOP = random_complex_tensor(CHI, 6) ;
 THREESITEEYE = complex(ncon((eye(CHI),eye(CHI),eye(CHI)),([-1,-11], [-2,-12], [-3,-13])));
@@ -33,9 +37,11 @@ for i in 1:LAYERS
     #@show abs(e1)
 end
 
-for i in collect(0:LAYERS)
-    expectationvalue1 = expectation(THREESITEEYE, M, i)
-    expectationvalue2 = expectation(ARANDOMOP, M, i)
+rlist = buildReverseRhosList(M);
+# -2 because we disregarding the raise to the top most and the penultimate
+for i in 1:(length(rlist)-2)
+    expectationvalue1 = expectation(ascendTo(THREESITEEYE,M,i), rlist[i])
+    expectationvalue2 = expectation(ascendTo(ARANDOMOP,M,i), rlist[i])
     println("E1 = ",expectationvalue1,"\t \& E2 = ",expectationvalue2)
 end
 
@@ -43,18 +49,18 @@ end
 # PROFILING ASCENDING SUPEROPERATORS
 # ------------------------------------------------------------
 
-MIN_A = 8
-MAX_A = 10
+MIN_A = 4
+MAX_A = 14
 
 CHISIZES_A = collect(MIN_A:MAX_A)
 TIMES_A1 = zeros(MIN_A:MAX_A) |> float;
 
 for chi in CHISIZES_A
-    l1 = generate_random_layer(chi);
-    chieye = complex(eye(chi));
-    threesiteeye = ncon((chieye, chieye, chieye), ([-1,-11], [-2,-12], [-3,-13]));
-    @time ( ascend_threesite_right(threesiteeye,l1));
-    #TIMES_A1[chi-(MIN_D-1)] = @elapsed ( ascend_threesite_symm(threesiteeye,l1));
+    l1 = generate_random_layer(chi,chi);
+    #chieye = complex(eye(chi));
+    #threesiteeye = ncon((chieye, chieye, chieye), ([-1,-11], [-2,-12], [-3,-13]));
+    #@time ( ascend_threesite_right(threesiteeye(chi),l1 ));
+    TIMES_A1[chi-(MIN_A-1)] = @elapsed ( ascend_threesite_symm(threesiteeye(chi),l1));
 end
 
 
@@ -68,30 +74,28 @@ MEmorycostA = sizeof(Complex{Float64})*(MAX_A^floor(SCalingpowerA)) / (1024^3)
 println("Power of chi scaling: ", SCalingpowerA)
 #println("Naive estimate of max memory cost: ", MEmorycostA," GB")
 
-pA=plot(
-layer(x=CHISIZES_A, y=TIMES_A1, Geom.point, Geom.line, Theme(default_color=color("red"))),
-Scale.x_log2, Scale.y_log2,
-Guide.xlabel("Bond dimension (chi)"), Guide.ylabel("Computational time (seconds)"),
-Guide.title("Complexity of contraction algorithm for A"))
+pA=plot(CHISIZES_A, TIMES_A1,
+		line=(:dot,1), marker=(:hex,6), leg=false,
+		xaxis=("Bond dimension (chi)",:log), yaxis=("Computational time (seconds)",:log),
+		title=("Complexity of contraction algorithm for A"))
 
-display(pA)
-draw(SVGJS("cost-scaling-A-single.js.svg", 6inch, 6inch), pA)
+savefig(pA,"cost-scaling-A-single.png")
 
 # ------------------------------------------------------------
 # PROFILING DESCENDING SUPEROPERATORS
 # ------------------------------------------------------------
 
-MIN_D = 8
+MIN_D = 4
 MAX_D = 14
 
 CHISIZES_D = collect(MIN_D:MAX_D)
 TIMES_D1 = zeros(MIN_D:MAX_D) |> float;
 
 for chi in CHISIZES_D
-     l1 = generate_random_layer(chi);
-     chieye = complex(eye(chi));
-     threesiteeye = ncon((chieye, chieye, chieye), ([-1,-11], [-2,-12], [-3,-13]));
-     TIMES_D1[chi-(MIN_D-1)] = @elapsed ( descend_threesite_symm(threesiteeye,l1));
+     l1 = generate_random_layer(chi,chi);
+     #chieye = complex(eye(chi));
+     #threesiteeye = ncon((chieye, chieye, chieye), ([-1,-11], [-2,-12], [-3,-13]));
+     TIMES_D1[chi-(MIN_D-1)] = @elapsed ( descend_threesite_symm(threesiteeye(chi),l1));
 end
 
 function costscalingD(b::Int,a::Int)
@@ -104,11 +108,12 @@ MEmorycostD = sizeof(Complex{Float64})*(MAX_D^floor(SCalingpowerD)) / (1024^3)
 println("Power of chi scaling: ", SCalingpowerD)
 #println("Naive estimate of max memory cost: ", MEmorycostD," GB")
 
-pD=plot(
-layer(x=CHISIZES_D, y=TIMES_D1, Geom.point, Geom.line, Theme(default_color=color("red"))),
-Scale.x_log2, Scale.y_log2,
-Guide.xlabel("Bond dimension (chi)"), Guide.ylabel("Computational time (seconds)"),
-Guide.title("Complexity of contraction algorithm for D"))
+pD=plot(CHISIZES_D, TIMES_D1,
+		line=(:dot,1), marker=(:hex,6), leg=false,
+		xaxis=("Bond dimension (chi)",:log), yaxis=("Computational time (seconds)",:log),
+		title=("Complexity of contraction algorithm for D"))
 
-display(pD)
-draw(SVGJS("cost-scaling-D-single.js.svg", 6inch, 6inch), pD)
+savefig(pD,"cost-scaling-D-single.png")
+
+
+

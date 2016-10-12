@@ -246,6 +246,7 @@ function ascendTo(op::Array{Complex{Float},3*2},m::MERA,EvalScale::Int64)
     for i in collect(1:EvalScale)
         opAtEvalScale = ascend_threesite_symm(opAtEvalScale,m.levelTensors[i])
     end
+    # Haven't accounted for the possible stepping up once through the top layer
     return opAtEvalScale
 end
 
@@ -344,6 +345,26 @@ function fixedpoint(Sop; seed_state=threesiteeye(chi), loop::Int64=10)
         # return newTop, threeSiteEnergy
         # How is it that this could possibly return the energy?
         # Only because the levelTensors have been optimized for a particular Hamiltonian :-?
+end
+
+function buildReverseRhosList(m::MERA, top_n=length(m.levelTensors))
+    # Specify the number of EvalScales sought. If not provided, defaults to all EvalScales
+    # evalscale starts at zero below layer1
+    uw_list=m.levelTensors;
+    totLayers = length(uw_list)
+    stateAtEvalScale = getTopState(m)
+    rhosListReverse = [];
+    push!(rhosListReverse,m.topLayer.state)
+    push!(rhosListReverse,stateAtEvalScale)
+
+    for j in reverse((totLayers-top_n+1):totLayers)
+        stateAtEvalScale = descend_threesite_symm(stateAtEvalScale,uw_list[j])
+        push!(rhosListReverse,stateAtEvalScale)
+    end
+
+    # Returns state above TopLayer and then the next n_top states
+    # To get the state at later x, with zero at the topmost layer, access rhosListReverse[1+x]
+    return rhosListReverse
 end
 
 #end

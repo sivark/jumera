@@ -194,26 +194,6 @@ function improveLayer(h_layer::Array{Complex{Float},6}, l::Layer, rho_layer::Arr
     return l
 end
 
-function buildReverseRhosList(m::MERA, top_n=length(m.levelTensors))
-    # Specify the number of EvalScales sought. If not provided, defaults to all EvalScales
-    # evalscale starts at zero below layer1
-    uw_list=m.levelTensors;
-    totLayers = length(uw_list)
-    stateAtEvalScale = getTopState(m)
-    rhosListReverse = [];
-    push!(rhosListReverse,m.topLayer.state)
-    push!(rhosListReverse,stateAtEvalScale)
-
-    for j in reverse((totLayers-top_n+1):totLayers)
-        stateAtEvalScale = descend_threesite_symm(stateAtEvalScale,uw_list[j])
-        push!(rhosListReverse,stateAtEvalScale)
-    end
-
-    # Returns state above TopLayer and then the next n_top states
-    # To get the state at later x, with zero at the topmost layer, access rhosListReverse[1+x]
-    return rhosListReverse
-end
-
 # Write a function to train the n coarsest layers, and also the top tensor
 # By default, the number of layers is the whole MERA; and non scale invariant top layer?
 # *Make this a HOfunction that takes in a function for improving the top layer!*

@@ -1,7 +1,7 @@
 #----------------------------------------------------------------------------
 # TRAINING HYPER-PARAMETERS: PRODUCTION
 # If we use Float32 then precision less than approximately 1e-7 is meaningless
-# This will/should render :EnergyDelta check pointless 
+# This will/should render :EnergyDelta check pointless
 # Should we optimize a multi-layer MERA with Float32 first
 # and then promote it to Float64 for fine-tuning sweeps?
 #----------------------------------------------------------------------------
@@ -18,3 +18,5 @@ parameters_init  = Dict(:EnergyDelta => 1e-8, :Qsweep => 12, :Qbatch => 50, :Qla
 parameters_graft = Dict(:EnergyDelta => 1e-8, :Qsweep => 20, :Qbatch => 50, :Qlayer => 4, :Qsingle => 5, :Qtop => 5);
 parameters_sweep = Dict(:EnergyDelta => 1e-10, :Qsweep => 20, :Qbatch => 50, :Qlayer => 3, :Qsingle => 5, :Qtop => 5);
 parameters_shortsweep = Dict(:EnergyDelta => 1e-10, :Qsweep => 20, :Qbatch => 50, :Qlayer => 3, :Qsingle => 5, :Qtop => 5);
+
+#parameters_parsed = Dict(:EnergyDelta => parsed["tolerance"], :Qsweep => 12, :Qbatch => 50, :Qlayer => 4, :Qsingle => 4, :Qtop => 5);

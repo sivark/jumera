@@ -7,7 +7,7 @@
 #----------------------------------------------------------------------------
 
 
-const CHI               = 5
+#const CHI               = 5
 const LAYER_SHAPE       = (8,fill(CHI,7)...)
 const INIT_LAYERS       = 3
 const INIT_LAYER_SHAPE  = LAYER_SHAPE[1:(INIT_LAYERS+1)]
@@ -18,5 +18,3 @@ parameters_init  = Dict(:EnergyDelta => 1e-8, :Qsweep => 12, :Qbatch => 50, :Qla
 parameters_graft = Dict(:EnergyDelta => 1e-8, :Qsweep => 20, :Qbatch => 50, :Qlayer => 4, :Qsingle => 5, :Qtop => 5);
 parameters_sweep = Dict(:EnergyDelta => 1e-10, :Qsweep => 20, :Qbatch => 50, :Qlayer => 3, :Qsingle => 5, :Qtop => 5);
 parameters_shortsweep = Dict(:EnergyDelta => 1e-10, :Qsweep => 20, :Qbatch => 50, :Qlayer => 3, :Qsingle => 5, :Qtop => 5);
-
-#parameters_parsed = Dict(:EnergyDelta => parsed["tolerance"], :Qsweep => 12, :Qbatch => 50, :Qlayer => 4, :Qsingle => 4, :Qtop => 5);

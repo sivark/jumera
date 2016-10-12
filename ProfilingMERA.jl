@@ -1,6 +1,3 @@
-using Plots
-pyplot()
-
 typealias Float Float64
 
 include("BinaryMERA.jl")
@@ -37,17 +34,21 @@ for i in 1:LAYERS
     #@show abs(e1)
 end
 
-rlist = buildReverseRhosList(M);
-# -2 because we disregarding the raise to the top most and the penultimate
-for i in 1:(length(rlist)-2)
-    expectationvalue1 = expectation(ascendTo(THREESITEEYE,M,i), rlist[i])
-    expectationvalue2 = expectation(ascendTo(ARANDOMOP,M,i), rlist[i])
+rlist = buildReverseRhosList(M) |> reverse;
+# -2 because we disregarding the state above the levelTensors of the topLayer
+for i in 0:(length(rlist)-2)
+    expectationvalue1 = expectation(ascendTo(THREESITEEYE,M,i), rlist[i+1])
+    expectationvalue2 = expectation(ascendTo(ARANDOMOP,M,i), rlist[i+1])
     println("E1 = ",expectationvalue1,"\t \& E2 = ",expectationvalue2)
 end
 
 # ------------------------------------------------------------
 # PROFILING ASCENDING SUPEROPERATORS
 # ------------------------------------------------------------
+
+using Plots
+pyplot()
+
 
 MIN_A = 4
 MAX_A = 14

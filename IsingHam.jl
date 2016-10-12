@@ -1,7 +1,7 @@
 # Ising model with transverse magnetic field h (critical h=1 by default)
 # Returns three-site Ising Hamiltonian (8x8 matrix), and the highest energy eigenvalue
 function build_H_Ising(h=1.0)
-    local h::Array{Complex{Float},6}
+    local H_op::Array{Complex{Float},6}
     local D_max::Float
     X = [0 1; 1 0]
     Z = [1 0; 0 -1]
@@ -22,8 +22,8 @@ function build_H_Ising(h=1.0)
     D_max = D[end]
     # subtract largest eigenvalue, so that the spectrum is negative
     H = H - eye(2^9)*D_max
-    h = reshape(H, (8,8,8,8,8,8)) |> complex
-    return h, D_max
+    H_op = reshape(H, (8,8,8,8,8,8)) |> complex
+    return H_op, D_max
     # Several objects here are not "Float", but the returned values
     # should be correctly converted because of type declaration
 end

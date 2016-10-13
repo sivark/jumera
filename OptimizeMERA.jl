@@ -1,9 +1,12 @@
 # ------------------------------------------------------------
-# [TODO] Autogenerate environments
-# 1. Understand why these are the optimal contraction orderings for each case
-# 2. Can I automate the creation of these different environments? Either with a function or with a macro
-# 3. For each tensor, what is the environment? Find and evaluate
-# 4. Write a macro to go through the fully contracted network,
+# [Bikeshedding] Can this code be made independent on the MERA scheme? (2-> MERA with 3-site operators)
+#   -   In principle, I can change 6 index objects to any even number,
+#       and if there isn't a match between the state and an operator then we'll see errors from ncon()
+#   -   OptimizeMERA module will then have to import the appropriate MERA structure module.
+# [Stretch TODO] Autogenerate environments
+#   -   Can I automate the creation of these different environments? Either with a function or with a macro
+#   -   For each tensor, what is the environment? Find and evaluate
+#   -   Write a macro to go through the fully contracted network,
 #       and knock off an isometry and label the open legs [-100,-200,-300,-400]
 # ------------------------------------------------------------
 

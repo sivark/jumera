@@ -347,6 +347,12 @@ function fixedpoint(Sop; seed_state=threesiteeye(chi), loop::Int64=10)
         # Only because the levelTensors have been optimized for a particular Hamiltonian :-?
 end
 
+# cFuncs = Map(Asop/Dsop,layerList)
+# with the possible need of a reverse if one starts from the other end of the MERA
+#function buildOpList(op,cFuncs::list_of_compose_fns)
+#end
+
+# Generalize this to buildOpList(op, Array{Asop/Dsop(LevelTensors)})
 function buildReverseRhosList(m::MERA, top_n=length(m.levelTensors))
     # Specify the number of EvalScales sought. If not provided, defaults to all EvalScales
     # evalscale starts at zero below layer1
@@ -367,6 +373,13 @@ function buildReverseRhosList(m::MERA, top_n=length(m.levelTensors))
     return rhosListReverse
 end
 
+# Note that this function does an expensive copy() of all the levelTensors in a MERA
+# For that reason it is not ideal for use inside buildReverseRhosList() or buildOpList()
+# if those will be called repeatedly. Appending a layer would be easy if the layers were
+# represented as a linked list, or a lookup table with pointers to the actual levelTensors
+# The tradeoff would be that one would have to do a small number of hops to "randomly" start
+# at some layer. Interestingly, this would have been easy if this list was constructed lazily
+# by the consumer rather than eagerly by the producer.
 function getLayerList(m::MERA;topRepeat::Int64=1)
     local layers::Array{Layer,1}
     layers = copy(m.levelTensors)

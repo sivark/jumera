@@ -231,8 +231,8 @@ type MERA
     #topTensor::Array{Complex{Float},3} # 3 indices
     topLayer::TopLayer
 end
-# Is it okay for concrete type MERA to be composed of an abstract type TopLayer?
-# How will the constructor instantiate a MERA?
+# Is it okay for concrete type MERA to be composed of an abstract type TopLayer? Not okay!
+# Otherwise how will the constructor instantiate a MERA?!
 
 
 # [TODO] Implement invariants for the MERA

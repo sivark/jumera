@@ -61,7 +61,7 @@ end
 
 function plotHamSpectrumLayerwise(spectrum_list)
     len = length(spectrum_list)
-    p=plot([0],[0],legend=false,
+    p=plot([0],[-4/pi],legend=false,
     xaxis=("Layer",(-0.5,len-0.5),0:1:(len-1)),
             yaxis=("Hamiltonian spectrum"),
             #background_color=RGB(0.3,0.5,0.1)

@@ -383,7 +383,9 @@ end
 function getLayerList(m::MERA;topRepeat::Int64=1)
     local layers::Array{Layer,1}
     layers = copy(m.levelTensors)
-    append!(layers, fill(m.topLayer.levelTensors,topRepeat))
+    if(topRepeat>0)
+        append!(layers, fill(m.topLayer.levelTensors,topRepeat))
+    end
     return layers
 end
 

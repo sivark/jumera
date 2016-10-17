@@ -421,4 +421,10 @@ function hamSpectrumLayerwise(h_base,layers::Array{Layer,1};downshift::Float=0.0
     return spectrum_list
 end
 
+function imposePDBC(op::Array{Complex{Float},6})
+    return (ncon((op), ([-100,-200,-300,-400,-500,-600]))
+    				+ ncon((op), ([-300,-100,-200,-600,-400,-500]))
+    				+ ncon((op), ([-200,-300,-100,-500,-600,-400])) )/3
+end
+
 #end

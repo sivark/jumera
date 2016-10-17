@@ -291,9 +291,7 @@ function improveNonSILtop(h_below::Array{Complex{Float},6}, t::TopLayer, params:
         h_above = ascend_threesite_symm(h_below, t.levelTensors)
 
         # Imposing periodic BCs
-        h_pdBC = (ncon((h_above), ([-100,-200,-300,-400,-500,-600]))
-    				+ ncon((h_above), ([-300,-100,-200,-600,-400,-500]))
-    				+ ncon((h_above), ([-200,-300,-100,-500,-600,-400])) )/3
+        h_pdBC  = imposePDBC(h_above)
 
         # pulling out the lowest energy eigenvector
         E,U = tensoreig(h_pdBC, [1,2,3], [4,5,6], hermitian=true)

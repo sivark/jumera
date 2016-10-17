@@ -257,6 +257,10 @@ function improveGraft!(improveTopLayer::Function,h_base::Array{Complex{Float},6}
             end
             m.topLayer, threeSiteEnergy =  improveTopLayer(h_layer, m.topLayer, params)
             energyPerSite = (threeSiteEnergy + Dmax)/3
+            # [IMPORTANT] **Use this only if the randomly initialized layer is inserted into m.levelTensors**
+            # Crazy if we wreck previously optimized m.topLayer.levelTensors with randomly initialized (new) toplayer
+            # Whether we push the trained topLayer into m.levelTensors or not, we must start by optimizing the
+            # randomly initialized layer instead of wrecking the trained layer.
 
             # Generate new RhosList for next round of optimization
             rhoslist_partial_rev = buildReverseRhosList(m, top_n-1)
@@ -349,9 +353,11 @@ function growMERA!(m::MERA,LAYER_SHAPE,INIT_LAYERS)
         exact_persite = exact_energy_persite(lyr);
         @printf "Not always exact per-site energy for this depth: %1.11f \n" exact_persite
 
-        #newLayer = generate_random_layer(LAYER_SHAPE[lyr],LAYER_SHAPE[lyr+1])
-        push!(m.levelTensors, m.topLayer.levelTensors)
-        m.topLayer = generate_random_top(LAYER_SHAPE[lyr],LAYER_SHAPE[lyr+1])
+        # Ensure that newly initialized layer gets trained first!
+        newLayer = generate_random_layer(LAYER_SHAPE[lyr],LAYER_SHAPE[lyr+1])
+        push!(m.levelTensors, newLayer)
+        #push!(m.levelTensors, m.topLayer.levelTensors)
+        #m.topLayer = generate_random_top(LAYER_SHAPE[lyr],LAYER_SHAPE[lyr+1])
 
         # It is tempting to guess a better initialization for the new layer.
         # Ideally, it is tempting to use the penultimate layer,

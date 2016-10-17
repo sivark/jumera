@@ -1,5 +1,6 @@
 # Ising model with transverse magnetic field h (critical h=1 by default)
 # Returns three-site Ising Hamiltonian (8x8 matrix), and the highest energy eigenvalue
+# WITHOUT IMPOSING anti/periodic BCs
 function build_H_Ising(h=1.0)
     local H_op::Array{Complex{Float},6}
     local D_max::Float

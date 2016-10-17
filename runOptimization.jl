@@ -2,48 +2,47 @@
 # Parsing arguments
 #----------------------------------------------------------------------------
 
-using ArgParse
-# To input FloatType and testing/production flag.
+#using ArgParse
+## To input FloatType and testing/production flag.
+#
+#settings = ArgParseSettings()
+#@add_arg_table settings begin
+#    #"--chi"
+#    #    help = "bond dimension"
+#    #    arg_type = Int64
+#    #    required = true
+#    #"--f32"
+#    #    help = "enforce Float32 precision"
+#    #    action = :store_true
+#    #"--init-layers"
+#    #    help = "number of transitional layers"
+#    #    arg_type = Int64
+#    #    default = 3
+#    #"--tolerance"
+#    #    help = "convergence tolerance"
+#    #    arg_type = Float64
+#    #    default = 1e-8
+#end
+#
+##parsed = parse_args(ARGS,settings)
+#
+#@printf("chi = %1d, tolerance = %1.1e, init layers = %1d\n",parsed["chi"], parsed["tolerance"], parsed["init-layers"])
+#
+#if(parsed["f32"])
+#    floattype = Float32
+#else
+#    floattype = Float64
+#end
+#
 
-settings = ArgParseSettings()
-@add_arg_table settings begin
-    "--chi"
-        help = "bond dimension"
-        arg_type = Int64
-        required = true
-    "--f32"
-        help = "enforce Float32 precision"
-        action = :store_true
-    #"--init-layers"
-    #    help = "number of transitional layers"
-    #    arg_type = Int64
-    #    default = 3
-    #"--tolerance"
-    #    help = "convergence tolerance"
-    #    arg_type = Float64
-    #    default = 1e-8
-end
-
-parsed = parse_args(ARGS,settings)
-
-@printf("chi = %1d, tolerance = %1.1e, init layers = %1d\n",parsed["chi"], parsed["tolerance"], parsed["init-layers"])
-
-if(parsed["f32"])
-    floattype = Float32
-else
-    floattype = Float64
-end
-
-#typealias Float Float64
+typealias Float Float64
 @show(Float)
 
 #----------------------------------------------------------------------------
 # Training parameters
 #----------------------------------------------------------------------------
 
-parameters_parsed = Dict(:EnergyDelta => parsed["tolerance"], :Qsweep => 12, :Qbatch => 50, :Qlayer => 4, :Qsingle => 4, :Qtop => 5);
-
-const CHI = parsed["chi"]
+#parameters_parsed = Dict(:EnergyDelta => parsed["tolerance"], :Qsweep => 12, :Qbatch => 50, :Qlayer => 4, :Qsingle => 4, :Qtop => 5);
 
 include("testParams.jl")
 

@@ -1,4 +1,4 @@
-# ------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------
 # [Bikeshedding] Can this code be made independent on the MERA scheme? (2-> MERA with 3-site operators)
 #   -   In principle, I can change 6 index objects to any even number,
 #       and if there isn't a match between the state and an operator then we'll see errors from ncon()
@@ -8,7 +8,7 @@
 #   -   For each tensor, what is the environment? Find and evaluate
 #   -   Write a macro to go through the fully contracted network,
 #       and knock off an isometry and label the open legs [-100,-200,-300,-400]
-# ------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------
 
 using JLD
 

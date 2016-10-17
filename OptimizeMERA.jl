@@ -197,10 +197,32 @@ function improveLayer(h_layer::Array{Complex{Float},6}, l::Layer, rho_layer::Arr
     return l
 end
 
+
+"""
 # Write a function to train the n coarsest layers, and also the top tensor
 # By default, the number of layers is the whole MERA; and non scale invariant top layer?
 # *Make this a HOfunction that takes in a function for improving the top layer!*
 # Would be wonderful if functions have useful type information! :P
+
+
+#----------------------------------------------------------------------------------------------------
+#   We have to make a choice between
+#   1. Building the list of effective Hamiltonians for each layer and then recursively
+#       stepping down the optimized state through optimized tensors.
+#   2. Building the list of states at each layer and then progressively stepping up the Hamiltonian
+#        after optimizing tensors on a layer. [CURRENTLY USING THIS]
+#
+#   I don't see any inherent advantage to one over the other. Both Asop & Dsop are 3site-->3site, so
+#   both must have the same computational cost.
+#   but one of them might be stable and the other unstable :-? Maybe I should either:
+#
+#   1. Make two functions for those two options and pass the choice explicitly to improveGraft!().
+#   2. make one function (since Rho and Ham are functionally interchangeable) and choose one of the
+#       two modes when calling the function.
+#
+#   It seems like I could just swap (UV,Ham)<-->(IR,Rho) in this code, and things will still work!?
+#   -------------------------------------------------------------------------------------------------
+"""
 function improveGraft!(improveTopLayer::Function,h_base::Array{Complex{Float},6}, m::MERA, params::Dict, top_n=length(m.levelTensors))
     #uw_list = m.levelTensors
     H = reshape(h_base, (8*8*8,8*8*8))

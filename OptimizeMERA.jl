@@ -264,10 +264,11 @@ function improveGraft!(improveTopLayer::Function,h_base::Array{Complex{Float},6}
 
             # Generate new RhosList for next round of optimization
             rhoslist_partial_rev = buildReverseRhosList(m, top_n-1)
-
-            fractional_energy_change = ((energyPerSite - energyPerSiteOld)/energyPerSite) |> abs;
-            energyPerSiteOld = energyPerSite;
         end
+
+        # Computing for each BATCH rather than for each ITERATION
+        fractional_energy_change = ((energyPerSite - energyPerSiteOld)/energyPerSite) |> abs;
+        energyPerSiteOld = energyPerSite;
 
         #print status at the end of every BATCH
         @printf "%4d iter: E = %1.11f , rate of change = %1.1e , fractional error = %1.1e\n" i*params[:Qbatch] energyPerSite fractional_energy_change fractional_energy_error(energyPerSite, len)

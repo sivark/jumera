@@ -242,8 +242,7 @@ function improveGraft!(improveTopLayer::Function,h_base::Array{Complex{Float},6}
     energyPerSiteOld            = convert(Float,0.0);
     energyPerSite               = convert(Float,0.0);
     i = 1;
-    #while(i<=params[:Qsweep] || fractional_energy_change>params[:EnergyDelta])
-    while (i<=params[:Qsweep] && fractional_energy_change>params[:EnergyDelta])
+    while(!stopCondition(len, i, fractional_energy_error(energyPerSite, len), fractional_energy_change, params))
         for b in 1:params[:Qbatch]
             # Ascend Hamiltonian to the layer we want to optimize
             h_layer = ascendTo(h_base, m, (length(m.levelTensors)-top_n) )
@@ -281,6 +280,14 @@ function improveGraft!(improveTopLayer::Function,h_base::Array{Complex{Float},6}
     println(string(map((x) -> '-', collect(1:28))...))
     return rhoslist_snapshots
     # Does removing the return value affect the speed of the program?
+end
+
+function stopCondition(nLyr::Int64, sweepCounter::Int64, fractional_energy_error::Float, fractional_energy_change::Float, params::Dict)
+    # Higher layers contribute less to the energy (and its improvement), still persist with
+    # training them to get the correct entanglement structure
+    return ( (fractional_energy_error / fractional_energy_change) > (params[:GiveUp]*nLyr^2)  || sweepCounter>params[:Qsweep])
+    #(i<=params[:Qsweep] || fractional_energy_change>params[:EnergyDelta])
+    #(i<=params[:Qsweep] && fractional_energy_change>params[:EnergyDelta])
 end
 
 function improveNonSILtop(h_below::Array{Complex{Float},6}, t::TopLayer, params::Dict)

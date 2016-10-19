@@ -27,6 +27,8 @@ type Tensor
     # specify contraction rules, index convention, etc.
 end
 
+typealias LocalOperator Array{Complex{Float},6}
+
 immutable Isometry
     elem::Array{Complex{Float},3}
 end
@@ -79,8 +81,8 @@ end
 #----# Note that the rightside operator is the parity flip rotation of the leftside operator :-)
 #----# ------------------------------------------------------------
 
-function ascend_threesite_left(op::Array{Complex{Float},3*2}, l::Layer)
-    local scaled_op::Array{Complex{Float},3*2}
+function ascend_threesite_left(op::LocalOperator, l::Layer)
+    local scaled_op::LocalOperator
     scaled_op = ncon((l.w.elem, l.w.elem, l.w.elem,
     l.u.elem, l.u.elem,
     op,
@@ -94,8 +96,8 @@ function ascend_threesite_left(op::Array{Complex{Float},3*2}, l::Layer)
     return scaled_op
 end
 
-function ascend_threesite_right(op::Array{Complex{Float},3*2}, l::Layer)
-    local scaled_op::Array{Complex{Float},3*2}
+function ascend_threesite_right(op::LocalOperator, l::Layer)
+    local scaled_op::LocalOperator
     scaled_op = ncon((l.w.elem, l.w.elem, l.w.elem,
     l.u.elem, l.u.elem,
     op,
@@ -109,12 +111,12 @@ function ascend_threesite_right(op::Array{Complex{Float},3*2}, l::Layer)
     return scaled_op
 end
 
-function ascend_threesite_symm(op::Array{Complex{Float},3*2}, l::Layer)
+function ascend_threesite_symm(op::LocalOperator, l::Layer)
     return convert(Float,0.5)*( ascend_threesite_left(op,l)+ascend_threesite_right(op,l) )
 end
 
-function descend_threesite_right(op::Array{Complex{Float},3*2}, l::Layer)
-    local scaled_op::Array{Complex{Float},3*2}
+function descend_threesite_right(op::LocalOperator, l::Layer)
+    local scaled_op::LocalOperator
     scaled_op = ncon((l.wdag.elem, l.wdag.elem, l.wdag.elem,
     l.udag.elem, l.udag.elem,
     op,
@@ -128,8 +130,8 @@ function descend_threesite_right(op::Array{Complex{Float},3*2}, l::Layer)
     return scaled_op
 end
 
-function descend_threesite_left(op::Array{Complex{Float},3*2}, l::Layer)
-    local scaled_op::Array{Complex{Float},3*2}
+function descend_threesite_left(op::LocalOperator, l::Layer)
+    local scaled_op::LocalOperator
     scaled_op = ncon((l.wdag.elem, l.wdag.elem, l.wdag.elem,
     l.udag.elem, l.udag.elem,
     op,
@@ -143,18 +145,18 @@ function descend_threesite_left(op::Array{Complex{Float},3*2}, l::Layer)
     return scaled_op
 end
 
-function descend_threesite_symm(op::Array{Complex{Float},3*2}, l::Layer)
+function descend_threesite_symm(op::LocalOperator, l::Layer)
     return convert(Float,0.5)*( descend_threesite_left(op,l)+descend_threesite_right(op,l) )
 end
 
 function Asop(l::Layer)
-    # Return linear map on op::Array{Complex{Float},3*2} ??
+    # Return linear map on op::LocalOperator ??
     # Convenient for tensor operations and for finding fixedpoint!
     return (   op -> ascend_threesite_symm(op, l)    )
 end
 
 function Dsop(l::Layer)
-    # Return linear map on op::Array{Complex{Float},3*2} ??
+    # Return linear map on op::LocalOperator ??
     # Convenient for tensor operations and for finding fixedpoint!
     return (   op -> descend_threesite_symm(op, l)    )
 end
@@ -173,17 +175,17 @@ end
 
 immutable TopLayer
     levelTensors::Layer
-    state::Array{Complex{Float},6} # 3-site RDM
+    state::LocalOperator # 3-site RDM
 end
 
 # immutable SILtop <: TopLayer
 #     levelTensors::Layer
-#     state::Array{Complex{Float},6} # 3-site RDM
+#     state::LocalOperator # 3-site RDM
 # end
 #
 # immutable nonSILtop <: TopLayer
 #     levelTensors::Layer
-#     state::Array{Complex{Float},6} # 3-site RDM
+#     state::LocalOperator # 3-site RDM
 # end
 
 # function generate_random_SILtop(chi)
@@ -195,7 +197,7 @@ end
 #
 # function generate_random_nonSILtop(chi_lower,chi_upper)
 #     levelTensors::Layer
-#     state::Array{Complex{Float},6}
+#     state::LocalOperator
 #
 #     top= randn(ntuple(_ -> chi, 3)...)
 #     top /= vecnorm(top)
@@ -208,7 +210,7 @@ end
 
 function generate_random_top(chi_lower,chi_upper)
     local levelTensors::Layer
-    local state::Array{Complex{Float},6}
+    local state::LocalOperator
 
     top= randn(ntuple(_ -> chi_upper, 3)...)
     top /= vecnorm(top)
@@ -243,7 +245,7 @@ end
 # Otherwise how will the constructor instantiate a MERA?!
 
 
-function ascendTo(op::Array{Complex{Float},3*2},m::MERA,EvalScale::Int64)
+function ascendTo(op::LocalOperator,m::MERA,EvalScale::Int64)
     opAtEvalScale = op
     for i in collect(1:EvalScale)
         opAtEvalScale = ascend_threesite_symm(opAtEvalScale,m.levelTensors[i])
@@ -423,7 +425,7 @@ function hamSpectrumLayerwise(h_base,layers::Array{Layer,1};downshift::Float=0.0
     return spectrum_list
 end
 
-function imposePDBC(op::Array{Complex{Float},6})
+function imposePDBC(op::LocalOperator)
     return (ncon((op), ([-100,-200,-300,-400,-500,-600]))
     				+ ncon((op), ([-300,-100,-200,-600,-400,-500]))
     				+ ncon((op), ([-200,-300,-100,-500,-600,-400])) )/3

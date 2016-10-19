@@ -12,7 +12,7 @@
 
 using JLD
 
-function improveU(h_layer::Array{Complex{Float},6}, l::Layer, rho_layer::Array{Complex{Float},6}, params::Dict)
+function improveU(h_layer::LocalOperator, l::Layer, rho_layer::LocalOperator, params::Dict)
     u = l.u.elem
     u_dg = l.udag.elem
     w = l.w.elem
@@ -91,7 +91,7 @@ function improveU(h_layer::Array{Complex{Float},6}, l::Layer, rho_layer::Array{C
     return u
 end
 
-function improveW(h_layer::Array{Complex{Float},6}, l::Layer, rho_layer::Array{Complex{Float},6}, params::Dict)
+function improveW(h_layer::LocalOperator, l::Layer, rho_layer::LocalOperator, params::Dict)
     u = l.u.elem
     u_dg = l.udag.elem
     w = l.w.elem
@@ -187,7 +187,7 @@ function improveW(h_layer::Array{Complex{Float},6}, l::Layer, rho_layer::Array{C
     return w
 end
 
-function improveLayer(h_layer::Array{Complex{Float},6}, l::Layer, rho_layer::Array{Complex{Float},6}, params::Dict)
+function improveLayer(h_layer::LocalOperator, l::Layer, rho_layer::LocalOperator, params::Dict)
     for i in 1:params[:Qlayer]
         #println(size(h_layer),"improvelayer",i)
         u = improveU(h_layer, l, rho_layer, params)
@@ -223,7 +223,7 @@ end
 #   It seems like I could just swap (UV,Ham)<-->(IR,Rho) in this code, and things will still work!?
 #   -------------------------------------------------------------------------------------------------
 """
-function improveGraft!(improveTopLayer::Function,h_base::Array{Complex{Float},6}, m::MERA, params::Dict, top_n=length(m.levelTensors))
+function improveGraft!(improveTopLayer::Function,h_base::LocalOperator, m::MERA, params::Dict, top_n=length(m.levelTensors))
     #uw_list = m.levelTensors
     H = reshape(h_base, (8*8*8,8*8*8))
     D, V = eig(Hermitian(H))
@@ -236,7 +236,7 @@ function improveGraft!(improveTopLayer::Function,h_base::Array{Complex{Float},6}
     # we need the state only at levels coarser than the ones we're training
     rhoslist_partial_rev = buildReverseRhosList(m, top_n-1)
     rhoslist_snapshots   = []
-    #Array(Array(Array{Complex{Float},6},len),:Qsweep)
+    #Array(Array(LocalOperator,len),:Qsweep)
 
     fractional_energy_change    = convert(Float,1.0);
     energyPerSiteOld            = convert(Float,0.0);
@@ -290,7 +290,7 @@ function stopCondition(nLyr::Int64, sweepCounter::Int64, fractional_energy_error
     #(i<=params[:Qsweep] && fractional_energy_change>params[:EnergyDelta])
 end
 
-function improveNonSILtop(h_below::Array{Complex{Float},6}, t::TopLayer, params::Dict)
+function improveNonSILtop(h_below::LocalOperator, t::TopLayer, params::Dict)
     local newTopLayer::TopLayer
     local threeSiteEnergy::Float
     threeSiteEnergy = 0.0
@@ -317,7 +317,7 @@ function improveNonSILtop(h_below::Array{Complex{Float},6}, t::TopLayer, params:
     return newTopLayer, threeSiteEnergy
 end
 
-function improveSILtop(h_below::Array{Complex{Float},6}, t::TopLayer, params::Dict)
+function improveSILtop(h_below::LocalOperator, t::TopLayer, params::Dict)
     local newTopLayer::TopLayer
     local threeSiteEnergy::Float
     # Get layer tensors, hamiltonian at the start of layer

@@ -1,3 +1,11 @@
+#----------------------------------------------------------------------------------------------------
+# [TODO] Implement invariants for the MERA
+# Can these be encoded in traits/interfaces/protocols?
+#   1. Unitarity properties of U and V
+#   2. Connections U -> V within a MERA layer
+#----------------------------------------------------------------------------------------------------
+
+
 #module BinaryMERA
 # Use as importall BinaryMERA
 
@@ -233,12 +241,6 @@ type MERA
 end
 # Is it okay for concrete type MERA to be composed of an abstract type TopLayer? Not okay!
 # Otherwise how will the constructor instantiate a MERA?!
-
-
-# [TODO] Implement invariants for the MERA
-# Can these be encoded in traits/interfaces/protocols?
-#   1. Unitarity properties of U and V
-#   2. Connections U -> V within a MERA layer
 
 
 function ascendTo(op::Array{Complex{Float},3*2},m::MERA,EvalScale::Int64)

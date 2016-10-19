@@ -14,7 +14,7 @@ const INIT_LAYER_SHAPE  = LAYER_SHAPE[1:(INIT_LAYERS+1)]
 
 # :EnergyDelta per sweep is set to 1e-8 because it will then take
 # O(1000) iterations to improve the accuracy of the energy by 1e-5
-parameters_init  = Dict(:GiveUp => 100.0, :Qsweep => 12, :Qbatch => 50, :Qlayer => 4, :Qsingle => 4, :Qtop => 5);
-parameters_graft = Dict(:GiveUp => 100.0, :Qsweep => 20, :Qbatch => 50, :Qlayer => 4, :Qsingle => 5, :Qtop => 5);
-parameters_sweep = Dict(:GiveUp => 100.0, :Qsweep => 20, :Qbatch => 50, :Qlayer => 3, :Qsingle => 5, :Qtop => 5);
-parameters_shortsweep = Dict(:GiveUp => 100.0, :Qsweep => 20, :Qbatch => 50, :Qlayer => 3, :Qsingle => 5, :Qtop => 5);
+parameters_init  = Dict(:GiveUp => 100, :Qsweep => 12, :Qbatch => 50, :Qlayer => 4, :Qsingle => 4, :Qtop => 5);
+parameters_graft = Dict(:GiveUp => 100, :Qsweep => 20, :Qbatch => 50, :Qlayer => 4, :Qsingle => 5, :Qtop => 5);
+parameters_sweep = Dict(:GiveUp => 100, :Qsweep => 20, :Qbatch => 50, :Qlayer => 3, :Qsingle => 5, :Qtop => 5);
+parameters_shortsweep = Dict(:GiveUp => 100, :Qsweep => 20, :Qbatch => 50, :Qlayer => 3, :Qsingle => 5, :Qtop => 5);

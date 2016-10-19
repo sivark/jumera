@@ -357,9 +357,9 @@ end
 
 function growMERA!(m::MERA,LAYER_SHAPE,INIT_LAYERS)
     for lyr in (INIT_LAYERS+1):(length(LAYER_SHAPE)-1)
-        @printf "\nNow adding layer number: %2d of bond dimensions %2d -> %2d" lyr LAYER_SHAPE[lyr] LAYER_SHAPE[lyr+1]
+        @printf "\nNow adding layer number: %2d of bond dimensions %2d -> %2d\n" lyr LAYER_SHAPE[lyr] LAYER_SHAPE[lyr+1]
         exact_persite = exact_energy_persite(lyr);
-        @printf "Not always exact per-site energy for this depth: %1.11f \n" exact_persite
+        @printf "Not always exact per-site energy for this depth: %1.11f\n" exact_persite
 
         # Ensure that newly initialized layer gets trained first!
         newLayer = generate_random_layer(LAYER_SHAPE[lyr],LAYER_SHAPE[lyr+1])

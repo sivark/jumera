@@ -45,10 +45,7 @@ end
 
 # ------------------------------------------------------------
 # Intermediate Layers
-# Each layer must provide methods to:
-# 1. Ascend/Descend an operator through the layer
-# 2. Evaluate energy when suplied a Hamiltonian to the UV and a state to the IR
-# 3. Export a method to train the layer
+# Each layer must provide methods to: Ascend/Descend an operator through the layer
 # ------------------------------------------------------------
 
 immutable Layer
@@ -77,10 +74,10 @@ immutable Layer
     # Keeping structure mutable leaves the option of using it while optimizing a MERA, etc
 end
 
-#----# ------------------------------------------------------------
-#----# BUILDING SUPER-OPERATORS
-#----# Note that the rightside operator is the parity flip rotation of the leftside operator :-)
-#----# ------------------------------------------------------------
+# ------------------------------------------------------------
+# BUILDING SUPER-OPERATORS
+# Note that the rightside operator is the parity flip rotation of the leftside operator :-)
+# ------------------------------------------------------------
 
 function ascend_threesite_left(op::LocalOperator, l::Layer)
     local scaled_op::LocalOperator
@@ -283,7 +280,6 @@ function generate_random_MERA(listOfChis)
 
     return MERA(uw_list, topTensor)
 end
-
 
 
 # ------------------------------------------------------------

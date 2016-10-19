@@ -206,6 +206,10 @@ end
 #     return nonSILtop(levelTensors,state)
 # end
 
+function getTopState(t::TopLayer)
+    return descend_threesite_symm(t.state, t.levelTensors)
+end
+
 function generate_random_top(chi_lower,chi_upper)
     local levelTensors::Layer
     local state::LocalOperator
@@ -323,10 +327,6 @@ function dm4pureState(pureState)
     return dm
 end
 
-function getTopState(m::MERA)
-    return descend_threesite_symm(m.topLayer.state, m.topLayer.levelTensors)
-end
-
 # Maybe one can improve on the Power method by the Lanczos method?
 function fixedpoint(Sop; seed_state=threesiteeye(chi), loop::Int64=10)
     # Sop is the operator whose fixed-point we seek
@@ -359,7 +359,7 @@ function buildReverseRhosList(m::MERA, top_n=length(m.levelTensors))
     # evalscale starts at zero below layer1
     uw_list=m.levelTensors;
     totLayers = length(uw_list)
-    stateAtEvalScale = getTopState(m)
+    stateAtEvalScale = getTopState(m.topLayer)
     rhosListReverse = [];
     push!(rhosListReverse,m.topLayer.state)
     push!(rhosListReverse,stateAtEvalScale)

@@ -3,6 +3,7 @@
 # Can these be encoded in traits/interfaces/protocols?
 #   1. Unitarity properties of U and V
 #   2. Connections U -> V within a MERA layer
+#   3. Asop and Dsop are adjoints (inverses as far as TN diagrams go)
 #----------------------------------------------------------------------------------------------------
 
 

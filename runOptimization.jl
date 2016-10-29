@@ -45,6 +45,7 @@ typealias Float Float64
 #parameters_parsed = Dict(:EnergyDelta => parsed["tolerance"], :Qsweep => 12, :Qbatch => 50, :Qlayer => 4, :Qsingle => 4, :Qtop => 5);
 
 include("testParams.jl")
+#include("productionParams.jl")
 
 # Print out the hyperparameters
 println("Shape of init layers -- ", INIT_LAYER_SHAPE)

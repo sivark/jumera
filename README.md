@@ -2,6 +2,8 @@ This project aims to learn an optimized 'Multiscale Entanglement Renormalization
 
 The references below explain the physics behind MERA, and the algorithmic aspects involved.
 
+The code in this repository has been written/checked to work with `Julia v0.5.0`.
+
 ## References
 
 1. Vidal [Entanglement renormalization](https://arxiv.org/abs/cond-mat/0512165v2)

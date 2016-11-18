@@ -1,17 +1,21 @@
-# Ising model with transverse magnetic field h (critical h=1 by default)
-# Returns three-site Ising Hamiltonian (8x8 matrix), and the highest energy eigenvalue
-# WITHOUT IMPOSING anti/periodic BCs
-
+module IsingHam
 typealias Float Float64
 
 using DocStringExtensions
 
+export build_H_Ising, build_P_Ising, build_S_Ising
+export exact_energy_persite, fractional_energy_error
+
 """
+Ising model with transverse magnetic field h (critical h=1 by default)
 Returns a three-site operator (of bond dimension eight) specifying the microscopic Hamiltonian for Ising spins lined up in 1d.
+WITHOUT IMPOSING anti/periodic BCs
 """
 function build_H_Ising(h::Float=1.0)
-# This needs to be shifted+added thrice to get a periodic Ham on three sites.
-# Hence the 1/3 factor here, and no 1/3 factor when imposing PDBC
+	# This needs to be shifted+added thrice to get a periodic Ham on three sites.
+	# Hence the 1/3 factor for nearest neighbor interactions within an effective site
+    # and the 1/2 factor for nearest neighbor interactions across two effective sites
+    # because each of the terms in (h123+h231+h321) will ignore one across-site coupling
     local H_op::Array{Complex{Float},6}
     local D_max::Float
     X = [0. 1.; 1. 0.]
@@ -30,14 +34,39 @@ function build_H_Ising(h::Float=1.0)
         H = kron(H, I) + kron(eyen2, H2)*factor
     end
     D, V = eig(Hermitian(H))
-    D_max = D[end]
-    # subtract largest eigenvalue, so that the spectrum is negative
-    H = H - eye(2^9)*D_max
-    #H = H - 4.0*9*eye(2^9) # To make all eigenvalues negative?
+    D_max = maximum(D)
+    # subtract largest eigenvalue, so that all eigenvalues are negative, and the ground state has largest magnitude eigenvalue
+    #H = H - eye(2^9)*D_max
+    H = H - 4.0*9*eye(2^9) # To make all eigenvalues negative?
     H_op = reshape(H, (8,8,8,8,8,8)) |> complex
     return H_op, D_max
     # Several objects here are not "Float", but the returned values
     # should be correctly converted because of type declaration
+end
+
+# This should be implemented in a model-independent way, so move to BinaryMERA.jl
+function build_P_Ising()
+    N = 9 # Effectively 3-site with 8-dim Hilbert space (N=3) each
+    SWAP = [1. 0. 0. 0.; 0. 0. 1. 0.; 0. 1. 0. 0.; 0. 0. 0. 1.]
+    I = eye(2)
+    T = SWAP
+    SWAPn = SWAP
+    for i=3:N
+        T = kron(T,I)
+        SWAPn = kron(I,SWAPn)
+        T = T*SWAPn
+    end
+    return reshape(T, (8,8,8,8,8,8)) |> complex
+end
+
+function build_S_Ising()
+    N = 9 # Effectively 3-site with 8-dim Hilbert space (N=3) each
+    Z = [1. 0.; 0. -1.]
+    S = Z
+    for i=2:N
+        S = kron(S,Z)
+    end
+    return reshape(S, (8,8,8,8,8,8)) |> complex
 end
 
 """
@@ -73,4 +102,7 @@ Given the per-spin energy of the MERA, this function returns the fractional erro
 function fractional_energy_error(energy_persite::Float, n_lyr::Int64)
     exact_persite = exact_energy_persite(n_lyr)
     return (energy_persite - exact_persite)/abs(exact_persite)
+end
+
+
 end

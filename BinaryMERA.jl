@@ -6,8 +6,15 @@
 #   3. Asop and Dsop are adjoints (inverses as far as TN diagrams go)
 #----------------------------------------------------------------------------------------------------
 
+module BinaryMERA
 
-#module BinaryMERA
+export Disentangler, Isometry, Layer, TopLayer, MERA
+export ascend_threesite_left, ascend_threesite_right, ascend_threesite_symm, ascendTo, Asop
+export descend_threesite_left, descend_threesite_right, descend_threesite_symm, descendTo, Dsop
+export getLayerList, buildReverseRhosList, hamSpectrumLayerwise, imposePDBC
+export threesiteeye
+
+typealias Float Float64
 # Use as importall BinaryMERA
 
 # -------------------------------------------------------------
@@ -77,6 +84,7 @@ end
 # ------------------------------------------------------------
 # BUILDING SUPER-OPERATORS
 # Note that the rightside operator is the parity flip rotation of the leftside operator :-)
+# Will Aleft correspond to right-movers and Aright correspond to left-movers?
 # ------------------------------------------------------------
 
 function ascend_threesite_left(op::LocalOperator, l::Layer)
@@ -429,4 +437,9 @@ function imposePDBC(op::LocalOperator)
     # Divide by 3 here IFF the 3site Hamiltonian doesn't already account for that
 end
 
-#end
+
+# Implement function to return a three site translation operators
+# First, with resolution of six sites (2x improvement)
+# Then, with (2^n x) improvement
+
+end

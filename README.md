@@ -1,4 +1,4 @@
-This project aims to learn an optimized 'Multiscale Entanglement Renormalization Ansatz' (MERA) representation for the ground state of a many-body quantum system. The MERA is most powerful when solving for scale invariant states, such as the ground state of the critical Ising model. The MERA allows us to numerically obtain conformal data, and efficiently calculate correlation functions, for the state it represents.
+This project aims to 'learn' an optimized 'Multiscale Entanglement Renormalization Ansatz' (MERA) representation for the ground state of a many-body quantum system, given a microscopic Hamiltonian. The MERA is most powerful when solving for scale invariant states, such as the ground state of the critical Ising model. The MERA allows us to numerically obtain conformal data, and efficiently calculate correlation functions, for the state it represents. In its current avatar, the code finds the optimal tensors by means of energy minimization.
 
 The references below explain the physics behind MERA, and the algorithmic aspects involved.
 

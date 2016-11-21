@@ -1,13 +1,15 @@
 # Ising model with transverse magnetic field h (critical h=1 by default)
 # Returns three-site Ising Hamiltonian (8x8 matrix), and the highest energy eigenvalue
 # WITHOUT IMPOSING anti/periodic BCs
-function build_H_Ising(h=1.0)
+
+typealias Float Float64
 
 using DocStringExtensions
 
 """
 Returns a three-site operator (of bond dimension eight) specifying the microscopic Hamiltonian for Ising spins lined up in 1d.
 """
+function build_H_Ising(h::Float=1.0)
     local H_op::Array{Complex{Float},6}
     local D_max::Float
     X = [0 1; 1 0]
@@ -35,18 +37,18 @@ Returns a three-site operator (of bond dimension eight) specifying the microscop
     # should be correctly converted because of type declaration
 end
 
-function approximate_energy_persite_PBC(nsites)
 """
 Calculates the approximate energy per spin, by including 1/N^2 finite size corrections to the universal energy density.
 """
+function approximate_energy_persite_PBC(nsites::Int64)
     # including only the leading finite-size correction
     return convert(Float,   ( -4/pi - (pi/6)/(nsites*nsites) )  )
 end
 
-function exact_energy_persite(n_lyr)
 """
 Given the number of layers (system size) for a MERA solution, this function returns the exact ground state energy when eight or fewer layers, and a useful approximation when more layers.
 """
+function exact_energy_persite(n_lyr::Int64)
     # Obtained by exact diagonalization of a free fermions system with the opposite BCs
     EnAPBC=[0,-1.270005811417927, -1.2724314193572888, -1.2730375326245706, -1.273189042909428, -1.2732269193538452, -1.2732363883945284];
 
@@ -62,6 +64,9 @@ Given the number of layers (system size) for a MERA solution, this function retu
     return convert(Float,EnPBC[n_lyr+1])
 end
 
+"""
+Given the per-spin energy of the MERA, this function returns the fractional error compared to the exact/approximate ground state energy.
+"""
 function fractional_energy_error(energy_persite::Float, n_lyr::Int64)
     exact_persite = exact_energy_persite(n_lyr)
     return (energy_persite - exact_persite)/abs(exact_persite)

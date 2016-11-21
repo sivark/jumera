@@ -12,14 +12,14 @@ Returns a three-site operator (of bond dimension eight) specifying the microscop
 function build_H_Ising(h::Float=1.0)
     local H_op::Array{Complex{Float},6}
     local D_max::Float
-    X = [0 1; 1 0]
-    Z = [1 0; 0 -1]
+    X = [0. 1.; 1. 0.]
+    Z = [1. 0.; 0. -1.]
     I = eye(2)
     XX = kron(X,X)
     ZI = kron(Z,I)
     IZ = kron(I,Z)
-    H2 = -(XX + h/2*(ZI+IZ))
     H = H2 / 3  # See below for an explanation of the 1/3.
+    H2 = -(XX + (h/2.0)*(ZI+IZ))
     for n = 3:9
         eyen2 = eye(2^(n-2))
         # Terms at the borders of the blocks of three that get grouped together

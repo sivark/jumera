@@ -10,6 +10,8 @@ using DocStringExtensions
 Returns a three-site operator (of bond dimension eight) specifying the microscopic Hamiltonian for Ising spins lined up in 1d.
 """
 function build_H_Ising(h::Float=1.0)
+# This needs to be shifted+added thrice to get a periodic Ham on three sites.
+# Hence the 1/3 factor here, and no 1/3 factor when imposing PDBC
     local H_op::Array{Complex{Float},6}
     local D_max::Float
     X = [0. 1.; 1. 0.]
@@ -18,8 +20,8 @@ function build_H_Ising(h::Float=1.0)
     XX = kron(X,X)
     ZI = kron(Z,I)
     IZ = kron(I,Z)
-    H = H2 / 3  # See below for an explanation of the 1/3.
     H2 = -(XX + (h/2.0)*(ZI+IZ))
+    H = H2 / 3
     for n = 3:9
         eyen2 = eye(2^(n-2))
         # Terms at the borders of the blocks of three that get grouped together

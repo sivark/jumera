@@ -31,6 +31,7 @@ function build_H_Ising(h::Float=1.0)
     D_max = D[end]
     # subtract largest eigenvalue, so that the spectrum is negative
     H = H - eye(2^9)*D_max
+    #H = H - 4.0*9*eye(2^9) # To make all eigenvalues negative?
     H_op = reshape(H, (8,8,8,8,8,8)) |> complex
     return H_op, D_max
     # Several objects here are not "Float", but the returned values

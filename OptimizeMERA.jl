@@ -239,10 +239,10 @@ function improveGraft!(improveTopLayer::Function,h_base::LocalOperator, m::MERA,
     #Array(Array(LocalOperator,len),:Qsweep)
 
     fractional_energy_change    = convert(Float,1.0);
-    energyPerSiteOld            = convert(Float,0.0);
-    energyPerSite               = convert(Float,0.0);
+    energyPerSpinOld            = convert(Float,0.0);
+    energyPerSpin               = convert(Float,0.0);
     i = 1;
-    while(!stopCondition(len, i, fractional_energy_error(energyPerSite, len), fractional_energy_change, params))
+    while(!stopCondition(len, i, fractional_energy_error(energyPerSpin, len), fractional_energy_change, params))
         for b in 1:params[:Qbatch]
             # Ascend Hamiltonian to the layer we want to optimize
             h_layer = ascendTo(h_base, m, (length(m.levelTensors)-top_n) )
@@ -255,7 +255,7 @@ function improveGraft!(improveTopLayer::Function,h_base::LocalOperator, m::MERA,
                 #println(size(h_layer),"improvegraft")
             end
             m.topLayer, threeSiteEnergy =  improveTopLayer(h_layer, m.topLayer, params)
-            energyPerSite = (threeSiteEnergy + Dmax)/3
+            energyPerSpin = (threeSiteEnergy + 3*D_max)/9
             # [IMPORTANT] **Use this only if the randomly initialized layer is inserted into m.levelTensors**
             # Crazy if we wreck previously optimized m.topLayer.levelTensors with randomly initialized (new) toplayer
             # Whether we push the trained topLayer into m.levelTensors or not, we must start by optimizing the
@@ -266,11 +266,11 @@ function improveGraft!(improveTopLayer::Function,h_base::LocalOperator, m::MERA,
         end
 
         # Computing for each BATCH rather than for each ITERATION
-        fractional_energy_change = ((energyPerSite - energyPerSiteOld)/energyPerSite) |> abs;
-        energyPerSiteOld = energyPerSite;
+        fractional_energy_change = ((energyPerSpin - energyPerSpinOld)/energyPerSpin) |> abs;
+        energyPerSpinOld = energyPerSpin;
 
         #print status at the end of every BATCH
-        @printf "%4d iter: E = %1.11f , rate of change = %1.1e , fractional error = %1.1e\n" i*params[:Qbatch] energyPerSite fractional_energy_change fractional_energy_error(energyPerSite, len)
+        @printf "%4d iter: E = %1.11f , rate of change = %1.1e , fractional error = %1.1e\n" i*params[:Qbatch] energyPerSpin fractional_energy_change fractional_energy_error(energyPerSpin, len)
         push!(rhoslist_snapshots,   (buildReverseRhosList(m) |> reverse)   )
         # Pushes the full rhoslist instead of just the top few layers we used
 

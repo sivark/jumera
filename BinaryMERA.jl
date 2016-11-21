@@ -425,7 +425,8 @@ end
 function imposePDBC(op::LocalOperator)
     return (ncon((op), ([-100,-200,-300,-400,-500,-600]))
     				+ ncon((op), ([-300,-100,-200,-600,-400,-500]))
-    				+ ncon((op), ([-200,-300,-100,-500,-600,-400])) )/3
+    				+ ncon((op), ([-200,-300,-100,-500,-600,-400])) )
+    # Divide by 3 here IFF the 3site Hamiltonian doesn't already account for that
 end
 
 #end
